@@ -140,9 +140,9 @@ function indexOfSmallest(a) {
 }
 
 function snapNote(note, guides, distance) {
-  var closest = indexOfSmallest(guides.map(x => Math.abs(note.centsToPitch - x)));
+  var closest = indexOfSmallest(guides.map(x => Math.abs(note.cents_above_base - x)));
   if(closest[1] < distance) {
-    note.centsToPitch = guides[closest[0]];
+    note.cents_above_base = guides[closest[0]];
   }
 }
 
@@ -174,7 +174,12 @@ $(document).ready(function() {
       draw();
     }
   }).mouseup(function(event) {
-    selected = false;
+    if (selected !== false) {
+      let snap = parseFloat($('#snap').val());
+      let closeMultiple = intervals[selected].cents_above_base - (intervals[selected].cents_above_base % snap);
+      snapNote(intervals[selected], [closeMultiple, closeMultiple + snap], snap);
+      selected = false;
+    }
     if(playing) {
       sequence.stop(0);
       var s = makeScale(intervals);
