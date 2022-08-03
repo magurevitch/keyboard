@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="static/styles.css">
+    <title>Keyboard</title>
+  </head>
+  <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.7/Tone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="src/main.js"></script>
+    <canvas height="120" width="800"></canvas>
+    <div>
+      Base note:
+      <input type="number" min="200" max="600" value="440" id="base">
+    </div>
+    <div>
+      Snap to the nearest
+      <input type="number" min="0" max="200" value="10" id="snap">
+      cents
+      <button id="snap-all">Snap all</button>
+    </div>
+    <div>
+      <button id="add-guideline">Add</button>
+      <select id="add-object">
+          <option value="guideline">guideline</option>
+          <option value="note">note</option>
+      </select>
+      at
+      <input type="number" id="guideline">
+      <select id="guideline-type">
+          <option value="ratio">as a ratio with base</option>
+          <option value="cents">cents above base</option>
+          <option value="hz">hertz</option>
+      </select>
+    </div>
+    <button id="play">Play</button>
+  </body>
+</html>
