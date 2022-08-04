@@ -140,10 +140,24 @@ function indexOfSmallest(a) {
 }
 
 function snapNote(note, guides, distance) {
-  var closest = indexOfSmallest(guides.map(x => Math.abs(note.centsToPitch - x)));
+  var closest = indexOfSmallest(guides.map(x => Math.abs(note.cents_above_base - x)));
   if(closest[1] < distance) {
-    note.centsToPitch = guides[closest[0]];
+    note.cents_above_base = guides[closest[0]];
   }
+}
+
+function snapToNearest(note, snap) {
+  let closeMultiple = note.cents_above_base - (note.cents_above_base % snap);
+  snapNote(note, [closeMultiple, closeMultiple + snap], snap);
+}
+
+function startSequence() {
+  var s = makeScale(intervals);
+  var scale = [0].concat(s).concat(s.slice(0,s.length-1).reverse());
+  sequence = makeSequence(scale);
+  Tone.start();
+  sequence.start(0);
+  Tone.Transport.start("+0.1");
 }
 
 $(document).ready(function() {
@@ -174,15 +188,14 @@ $(document).ready(function() {
       draw();
     }
   }).mouseup(function(event) {
-    selected = false;
+    if (selected !== false) {
+      let snap = parseFloat($('#snap').val());
+      snapToNearest(intervals[selected], snap);
+      selected = false;
+    }
     if(playing) {
       sequence.stop(0);
-      var s = makeScale(intervals);
-      var scale = [0].concat(s).concat(s.slice(0,s.length-1).reverse());
-      sequence = makeSequence(scale);
-      Tone.start();
-      sequence.start(0);
-      Tone.Transport.start("+0.1");
+      startSequence();
     }
     draw();
   }).mouseout(function(event) {
@@ -200,12 +213,7 @@ $(document).ready(function() {
       draw();
     } else {
       $('#play').text("Stop");
-      var s = makeScale(intervals);
-      var scale = [0].concat(s).concat(s.slice(0,s.length-1).reverse());
-      sequence = makeSequence(scale);
-      Tone.start();
-      sequence.start(0);
-      Tone.Transport.start("+0.1");
+      startSequence();
       playing=true;
     }
   });
@@ -219,6 +227,17 @@ $(document).ready(function() {
       intervals.sort();
     } else {
           guidelines.push({'number': number, 'type': type});
+    }
+    draw();
+  });
+  $('#snap-all').click(function(event) {
+    intervals.forEach(note => {
+      let snap = parseFloat($('#snap').val());
+      snapToNearest(note, snap);
+    });
+    if(playing) {
+      sequence.stop(0);
+      startSequence();
     }
     draw();
   });
