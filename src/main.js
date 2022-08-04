@@ -236,6 +236,15 @@ $(document).ready(function() {
       let snap = parseFloat($('#snap').val());
       snapToNearest(note, snap);
     });
+    if(playing) {
+      sequence.stop(0);
+      var s = makeScale(intervals);
+      var scale = [0].concat(s).concat(s.slice(0,s.length-1).reverse());
+      sequence = makeSequence(scale);
+      Tone.start();
+      sequence.start(0);
+      Tone.Transport.start("+0.1");
+    }
     draw();
   });
   $('#base').change(function(event) {
