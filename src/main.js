@@ -151,6 +151,15 @@ function snapToNearest(note, snap) {
   snapNote(note, [closeMultiple, closeMultiple + snap], snap);
 }
 
+function startSequence() {
+  var s = makeScale(intervals);
+  var scale = [0].concat(s).concat(s.slice(0,s.length-1).reverse());
+  sequence = makeSequence(scale);
+  Tone.start();
+  sequence.start(0);
+  Tone.Transport.start("+0.1");
+}
+
 $(document).ready(function() {
   draw();
   $('canvas').mousedown(function(event) {
@@ -186,12 +195,7 @@ $(document).ready(function() {
     }
     if(playing) {
       sequence.stop(0);
-      var s = makeScale(intervals);
-      var scale = [0].concat(s).concat(s.slice(0,s.length-1).reverse());
-      sequence = makeSequence(scale);
-      Tone.start();
-      sequence.start(0);
-      Tone.Transport.start("+0.1");
+      startSequence();
     }
     draw();
   }).mouseout(function(event) {
@@ -209,12 +213,7 @@ $(document).ready(function() {
       draw();
     } else {
       $('#play').text("Stop");
-      var s = makeScale(intervals);
-      var scale = [0].concat(s).concat(s.slice(0,s.length-1).reverse());
-      sequence = makeSequence(scale);
-      Tone.start();
-      sequence.start(0);
-      Tone.Transport.start("+0.1");
+      startSequence();
       playing=true;
     }
   });
@@ -238,12 +237,7 @@ $(document).ready(function() {
     });
     if(playing) {
       sequence.stop(0);
-      var s = makeScale(intervals);
-      var scale = [0].concat(s).concat(s.slice(0,s.length-1).reverse());
-      sequence = makeSequence(scale);
-      Tone.start();
-      sequence.start(0);
-      Tone.Transport.start("+0.1");
+      startSequence();
     }
     draw();
   });
