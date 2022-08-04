@@ -146,6 +146,11 @@ function snapNote(note, guides, distance) {
   }
 }
 
+function snapToNearest(note, snap) {
+  let closeMultiple = note.cents_above_base - (note.cents_above_base % snap);
+  snapNote(note, [closeMultiple, closeMultiple + snap], snap);
+}
+
 $(document).ready(function() {
   draw();
   $('canvas').mousedown(function(event) {
@@ -176,8 +181,7 @@ $(document).ready(function() {
   }).mouseup(function(event) {
     if (selected !== false) {
       let snap = parseFloat($('#snap').val());
-      let closeMultiple = intervals[selected].cents_above_base - (intervals[selected].cents_above_base % snap);
-      snapNote(intervals[selected], [closeMultiple, closeMultiple + snap], snap);
+      snapToNearest(intervals[selected], snap);
       selected = false;
     }
     if(playing) {
@@ -225,6 +229,13 @@ $(document).ready(function() {
     } else {
           guidelines.push({'number': number, 'type': type});
     }
+    draw();
+  });
+  $('#snap-all').click(function(event) {
+    intervals.forEach(note => {
+      let snap = parseFloat($('#snap').val());
+      snapToNearest(note, snap);
+    });
     draw();
   });
   $('#base').change(function(event) {
