@@ -21,24 +21,43 @@ var intervals = makeTet(12).map(x => {
 var selected = false;
 var guidelines = [{number: 2, type: 'ratio'}];
 
-function makeScale() {
-  return intervals.filter(x => x.in_scale).map(x => x.cents_above_base);
-}
-
 function getScaleIndices() {
   return intervals.reduce((acc, x, i) => x.in_scale ? [...acc, i] : acc, []);
 }
 
-function makeSequence(sequence) {
-  return new Tone.Sequence(function(time, note){
+function highlightNote(index) {
+  var tCanvas = $('#temperment').get(0);
+  var tCtx = tCanvas.getContext("2d");
+  tCtx.fillStyle = "#FF0000";
+  tCtx.fillRect(scaleToCanvas(tCanvas, intervals[index]?.cents_above_base || 0)-10, 25, 20, 20);
+
+  var kCanvas = $('#keyboard').get(0);
+  var kCtx = kCanvas.getContext("2d");
+  kCtx.fillStyle = "#FF0000";
+  let scaleIndices = getScaleIndices();
+  let size = kCanvas.width / (scaleIndices.length+1);
+  if (index < 0) {
+    kCtx.fillRect(0, kCanvas.height/2, size, kCanvas.height/2);
+  } else if (intervals[index].in_scale) {
+    let start = (scaleIndices.findIndex(x => x === index)+1) * size;
+    kCtx.fillRect(start, kCanvas.height/2, size, kCanvas.height/2);
+  } else {
+    //if not in scale
+  }
+}
+
+function makeScale() {
+  let indices = getScaleIndices();
+  return [-1, ...indices, ...indices.slice(0, indices.length-1).reverse(), -1];
+}
+
+function makeSequence(scale) {
+  return new Tone.Sequence(function(time, index){
       draw();
-      var canvas = $('#temperment').get(0);
-      var ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#FF0000";
-      ctx.fillRect(scaleToCanvas(canvas,note)-10, 25, 20, 20);
+      highlightNote(index);
       let baseNote = parseFloat($('#base').val());
-      synth.triggerAttackRelease(centsToPitch(baseNote, note), "4n", time);
-  }, sequence, "4n");
+      synth.triggerAttackRelease(centsToPitch(baseNote, intervals[index]?.cents_above_base || 0), "4n", time);
+  }, scale, "4n");
 };
 
 function fractionToCents(a, b) {
@@ -117,7 +136,7 @@ function showNote(item) {
 function showKeyboard() {
   var canvas = $('#keyboard').get(0);
   var ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#000000";
+  ctx.fillStyle = "#444444";
   ctx.fillRect(0,0,canvas.width, canvas.height);
   let scaleIndices = getScaleIndices();
   let size = canvas.width / (scaleIndices.length+1);
@@ -127,7 +146,7 @@ function showKeyboard() {
     ctx.fillRect(start + 4, 2, size-8, canvas.height-4);
   });
   [-1, ...scaleIndices].forEach((item, i) => {
-    ctx.fillStyle = "#FF0000";
+    ctx.fillStyle = "#000000";
     let accidentals = (scaleIndices[i] || intervals.length) - item;
     let accidentalSize = size/accidentals;
     let start = (i + 1/2) * size + accidentalSize/2;
@@ -199,8 +218,7 @@ function snapToNearest(note, snap) {
 }
 
 function startSequence() {
-  var s = makeScale(intervals);
-  var scale = [0].concat(s).concat(s.slice(0,s.length-1).reverse());
+  let scale = makeScale();
   sequence = makeSequence(scale);
   Tone.start();
   sequence.start(0);
