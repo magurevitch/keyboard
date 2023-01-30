@@ -162,7 +162,7 @@ function startSequence() {
 
 $(document).ready(function() {
   draw();
-  $('canvas').mousedown(function(event) {
+  $('#temperment').mousedown(function(event) {
     var canvas = $('canvas').get(0);
     var ctx = canvas.getContext("2d");
     var scaleToCanvas = x => linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
