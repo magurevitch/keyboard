@@ -1,18 +1,3 @@
-var synth = new Tone.Synth({
-  oscillator: {
-    type: 'sawtooth4',
-    partials: [1, 0.5, 0.25, 0.125, 0.0625]
-  },
-  envelope: {
-    attack : 0.01 ,
-    decay : 0.03,
-    sustain : 0.2 ,
-    release : 0 ,
-    attackCurve : 'linear' ,
-    decayCurve : 'linear' ,
-    releaseCurve : 'exponential'
-  }
-}).toMaster();
 var sequence = null;
 var playing = false;
 var intervals = makeTet(12).map(x => {
@@ -21,22 +6,14 @@ var intervals = makeTet(12).map(x => {
 var selected = false;
 var guidelines = [{number: 2, type: 'ratio'}];
 
-function makeScale() {
-  return intervals.filter(x => x.in_scale).map(x => x.cents_above_base);
+function getScaleIndices() {
+  return intervals.reduce((acc, x, i) => x.in_scale ? [...acc, i] : acc, []);
 }
 
-function makeSequence(sequence) {
-  return new Tone.Sequence(function(time, note){
-      draw();
-      var canvas = $('canvas').get(0);
-      var ctx = canvas.getContext("2d");
-      var scaleToCanvas = x => linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
-      ctx.fillStyle = "#FF0000";
-      ctx.fillRect(scaleToCanvas(note)-10, 25, 20, 20);
-      let baseNote = parseFloat($('#base').val());
-      synth.triggerAttackRelease(centsToPitch(baseNote, note), "4n", time);
-  }, sequence, "4n");
-};
+function makeScale() {
+  let indices = getScaleIndices();
+  return [-1, ...indices, ...indices.slice(0, indices.length-1).reverse(), -1];
+}
 
 function fractionToCents(a, b) {
   return 1200 * Math.log2(b ? a/b : a);
@@ -46,65 +23,9 @@ function centsToPitch(baseNote, cents_above_base) {
   return baseNote * Math.pow(2, cents_above_base / 1200);
 }
 
-function showCents() {
-  var canvas = $('canvas').get(0);
-  var ctx = canvas.getContext("2d");
-  var scaleToCanvas = x => linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
-  ctx.fillStyle = "#0000FF";
-  var prev = 0;
-  var cents = [];
-  for(var interval of intervals) {
-    if(interval.in_scale) {
-      ctx.fillRect(scaleToCanvas(prev)+1, 104, 2, 10);
-      ctx.fillRect(scaleToCanvas(prev)+3, 106, scaleToCanvas(interval.cents_above_base)-scaleToCanvas(prev)-5, 2);
-      ctx.fillRect(scaleToCanvas(interval.cents_above_base)-3, 104, 2, 10);
-      ctx.fillText((interval.cents_above_base - prev).toFixed(2), scaleToCanvas(prev)+5, 116);
-      prev = interval.cents_above_base;
-    }
-  }
-  return cents;
-}
-
-function showGuidelines() {
-  var canvas = $('canvas').get(0);
-  var ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#FF00FF";
-  let baseNote = parseFloat($('#base').val());
-  var scaleToCanvas = x => linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
-  guidelines.forEach(item => {
-    var cents = item.type === 'hz' ? fractionToCents(item.number, baseNote) : item.type === 'ratio' ? fractionToCents(item.number) : item.number;
-    ctx.fillRect(scaleToCanvas(cents)-1, 0, 2, 105);
-    ctx.fillText(item.number.toFixed(2) + ' ' + item.type, scaleToCanvas(cents)-5, 115);
-  });
-}
-
-function draw() {
-  var canvas = $('canvas').get(0);
-  var ctx = canvas.getContext("2d");
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  var scaleToCanvas = x => linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
-  ctx.fillStyle = "#FFFF00";
-  if(selected !== false) {
-    ctx.fillRect(scaleToCanvas(intervals[selected].cents_above_base)-4, 0, 8, 110);
-    ctx.fillRect(scaleToCanvas(intervals[selected].cents_above_base)-20, 15, 40, 40);
-  }
-  showGuidelines();
-  ctx.fillStyle = "#000000";
-  ctx.fillRect(scaleToCanvas(0)-2, 0, 4, 150);
-  ctx.fillRect(scaleToCanvas(0)-15, 20, 30, 30);
-  intervals.forEach((item, i) => {
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(scaleToCanvas(item.cents_above_base)-2, 10, 4, 90);
-    ctx.fillRect(scaleToCanvas(item.cents_above_base)-15, 20, 30, 30);
-    ctx.clearRect(scaleToCanvas(item.cents_above_base)-10, 25, 20, 20);
-    if(item.in_scale) {
-      ctx.fillStyle = "#0000FF";
-      ctx.beginPath();
-      ctx.arc(scaleToCanvas(item.cents_above_base), 35, 12, 0,2*Math.PI);
-      ctx.fill();
-    }
-  });
-  showCents();
+function scaleToTemperment(x) {
+  let canvas = $('#temperment').get(0);
+  return linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
 }
 
 function linearMapping(x, a, b, c, d) {
@@ -152,8 +73,7 @@ function snapToNearest(note, snap) {
 }
 
 function startSequence() {
-  var s = makeScale(intervals);
-  var scale = [0].concat(s).concat(s.slice(0,s.length-1).reverse());
+  let scale = makeScale();
   sequence = makeSequence(scale);
   Tone.start();
   sequence.start(0);
@@ -162,12 +82,10 @@ function startSequence() {
 
 $(document).ready(function() {
   draw();
-  $('canvas').mousedown(function(event) {
-    var canvas = $('canvas').get(0);
-    var ctx = canvas.getContext("2d");
-    var scaleToCanvas = x => linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
+  $('#temperment').mousedown(function(event) {
+    var canvas = $('#temperment').get(0);
     var scaleFromCanvas = x => linearMapping(x,canvas.width/8,7*canvas.width/8,0,1200);
-    var closest = indexOfSmallest(intervals.map(x => Math.abs(event.offsetX - scaleToCanvas(x.cents_above_base))));
+    var closest = indexOfSmallest(intervals.map(x => Math.abs(event.offsetX - scaleToTemperment(x.cents_above_base))));
     if(closest[1] < 15) {
       if(20 < event.offsetY && event.offsetY < 50) {
         intervals[closest[0]].in_scale = !intervals[closest[0]].in_scale;
@@ -182,7 +100,7 @@ $(document).ready(function() {
     draw();
   }).mousemove(function(event) {
     if(selected !== false) {
-      var canvas = $('canvas').get(0);
+      var canvas = $('#temperment').get(0);
       var scaleFromCanvas = x => linearMapping(x,canvas.width/8,7*canvas.width/8,0,1200);
       intervals[selected].cents_above_base = scaleFromCanvas(event.offsetX);
       draw();
@@ -191,6 +109,7 @@ $(document).ready(function() {
     if (selected !== false) {
       let snap = parseFloat($('#snap').val());
       snapToNearest(intervals[selected], snap);
+      intervals.sort((a,b) => a.cents_above_base - b.cents_above_base);
       selected = false;
     }
     if(playing) {
@@ -207,12 +126,12 @@ $(document).ready(function() {
   });
   $('#play').click(function(event) {
     if (playing) {
-      $('#play').text("Play");
+      $('#play').text("Play Scale");
       sequence.stop(0);
       playing = false;
       draw();
     } else {
-      $('#play').text("Stop");
+      $('#play').text("Stop Scale");
       startSequence();
       playing=true;
     }
@@ -223,8 +142,9 @@ $(document).ready(function() {
     if($('#add-object').val() === 'note') {
       let baseNote = parseFloat($('#base').val());
       let cents = type === 'hz' ? fractionToCents(number, baseNote) : type === 'ratio' ? fractionToCents(number) : number;
-      intervals.push({cents_above_base:  cents, in_scale: false});
-      intervals.sort();
+      var closest = indexOfSmallest(intervals.map(x => Math.abs(cents - x.cents_above_base)));
+      var position = cents < intervals[closest[0]].cents_above_base ? closest[0] : closest[0] + 1;
+      intervals.splice(position, 0, {cents_above_base: cents, in_scale: false});
     } else {
       guidelines.push({number: number, type: type});
     }
@@ -244,7 +164,7 @@ $(document).ready(function() {
   $('#make-tet').click(function(event) {
     let tet = parseFloat($('#tet').val());
     if(playing) {
-      $('#play').text("Play");
+      $('#play').text("Play Scale");
       sequence.stop(0);
       playing = false;
     }
@@ -255,5 +175,26 @@ $(document).ready(function() {
   });
   $('#base').change(function(event) {
     draw();
+  });
+  $('#keyboard').click(function(event) {
+    let canvas = $('#keyboard').get(0);
+    let scaleDegree = linearMapping(event.offsetX, 0, canvas.width, -1, intervals.filter(x=> x.in_scale).length);
+    let scaleIndices = getScaleIndices();
+    if(event.offsetY < canvas.height / 2) {
+      let noteBelow = Math.floor(scaleDegree-0.5);
+      if(noteBelow < -1) {
+        playNote(-1);
+      } else {
+        let indexBelow = scaleIndices[noteBelow] === undefined ? -1 : scaleIndices[noteBelow];
+        let indexAbove = scaleIndices[noteBelow+1] === undefined ? intervals.length : scaleIndices[noteBelow+1];
+        let intervalSize = indexAbove-indexBelow;
+        let intervalDegree = intervalSize === 1 ?
+          scaleIndices[Math.floor(scaleDegree)] :
+          Math.floor(linearMapping(scaleDegree-0.5,noteBelow+1/(2*intervalSize),noteBelow+1-1/(2*intervalSize), indexBelow+1, indexAbove));
+        playNote(intervalDegree);
+      }
+    } else {
+      playNote(scaleIndices[Math.floor(scaleDegree)] || -1);
+    }
   });
 });
