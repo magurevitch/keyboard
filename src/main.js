@@ -243,10 +243,15 @@ $(document).ready(function() {
   });
   $('#make-tet').click(function(event) {
     let tet = parseFloat($('#tet').val());
+    if(playing) {
+      $('#play').text("Play");
+      sequence.stop(0);
+      playing = false;
+      draw();
+    }
     intervals = makeTet(tet).map(x => {
       return {cents_above_base: x, in_scale: false};
     });
-    sequence.stop(0);
     draw();
   });
   $('#base').change(function(event) {
