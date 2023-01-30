@@ -16,10 +16,10 @@ var synth = new Tone.Synth({
 var sequence = null;
 var playing = false;
 var intervals = makeTet(12).map(x => {
-  return {'cents_above_base': x, 'in_scale': false};
+  return {cents_above_base: x, in_scale: false};
 });
 var selected = false;
-var guidelines = [];
+var guidelines = [{number: 2, type: 'ratio'}];
 
 function makeScale() {
   return intervals.filter(x => x.in_scale).map(x => x.cents_above_base);
@@ -177,7 +177,7 @@ $(document).ready(function() {
     } else {
       var cents = scaleFromCanvas(event.offsetX);
       var position = cents < intervals[closest[0]].cents_above_base ? closest[0] : closest[0] + 1;
-      intervals.splice(position, 0, {'cents_above_base': cents, 'in_scale': false});
+      intervals.splice(position, 0, {cents_above_base: cents, in_scale: false});
     }
     draw();
   }).mousemove(function(event) {
@@ -223,10 +223,10 @@ $(document).ready(function() {
     if($('#add-object').val() === 'note') {
       let baseNote = parseFloat($('#base').val());
       let cents = type === 'hz' ? fractionToCents(number, baseNote) : type === 'ratio' ? fractionToCents(number) : number;
-      intervals.push({'cents_above_base':  cents, 'in_scale': false});
+      intervals.push({cents_above_base:  cents, in_scale: false});
       intervals.sort();
     } else {
-          guidelines.push({'number': number, 'type': type});
+      guidelines.push({number: number, type: type});
     }
     draw();
   });
@@ -239,6 +239,14 @@ $(document).ready(function() {
       sequence.stop(0);
       startSequence();
     }
+    draw();
+  });
+  $('#make-tet').click(function(event) {
+    let tet = parseFloat($('#tet').val());
+    intervals = makeTet(tet).map(x => {
+      return {cents_above_base: x, in_scale: false};
+    });
+    sequence.stop(0);
     draw();
   });
   $('#base').change(function(event) {
