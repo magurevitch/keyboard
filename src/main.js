@@ -28,7 +28,7 @@ function makeScale() {
 function makeSequence(sequence) {
   return new Tone.Sequence(function(time, note){
       draw();
-      var canvas = $('canvas').get(0);
+      var canvas = $('#temperment').get(0);
       var ctx = canvas.getContext("2d");
       var scaleToCanvas = x => linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
       ctx.fillStyle = "#FF0000";
@@ -47,7 +47,7 @@ function centsToPitch(baseNote, cents_above_base) {
 }
 
 function showCents() {
-  var canvas = $('canvas').get(0);
+  var canvas = $('#temperment').get(0);
   var ctx = canvas.getContext("2d");
   var scaleToCanvas = x => linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
   ctx.fillStyle = "#0000FF";
@@ -66,7 +66,7 @@ function showCents() {
 }
 
 function showGuidelines() {
-  var canvas = $('canvas').get(0);
+  var canvas = $('#temperment').get(0);
   var ctx = canvas.getContext("2d");
   ctx.fillStyle = "#FF00FF";
   let baseNote = parseFloat($('#base').val());
@@ -79,7 +79,7 @@ function showGuidelines() {
 }
 
 function draw() {
-  var canvas = $('canvas').get(0);
+  var canvas = $('#temperment').get(0);
   var ctx = canvas.getContext("2d");
   ctx.clearRect(0,0,canvas.width,canvas.height);
   var scaleToCanvas = x => linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
@@ -163,7 +163,7 @@ function startSequence() {
 $(document).ready(function() {
   draw();
   $('#temperment').mousedown(function(event) {
-    var canvas = $('canvas').get(0);
+    var canvas = $('#temperment').get(0);
     var ctx = canvas.getContext("2d");
     var scaleToCanvas = x => linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
     var scaleFromCanvas = x => linearMapping(x,canvas.width/8,7*canvas.width/8,0,1200);
@@ -182,7 +182,7 @@ $(document).ready(function() {
     draw();
   }).mousemove(function(event) {
     if(selected !== false) {
-      var canvas = $('canvas').get(0);
+      var canvas = $('#temperment').get(0);
       var scaleFromCanvas = x => linearMapping(x,canvas.width/8,7*canvas.width/8,0,1200);
       intervals[selected].cents_above_base = scaleFromCanvas(event.offsetX);
       draw();
