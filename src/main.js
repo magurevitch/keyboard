@@ -59,7 +59,7 @@ function showCents() {
     if(interval.in_scale) {
       ctx.fillRect(scaleToCanvas(canvas,prev)+1, 104, 2, 10);
       ctx.fillRect(scaleToCanvas(canvas,prev)+3, 106, scaleToCanvas(canvas, interval.cents_above_base)-scaleToCanvas(canvas,prev)-5, 2);
-      ctx.fillRect(scaleToCanvas(interval.cents_above_base)-3, 104, 2, 10);
+      ctx.fillRect(scaleToCanvas(canvas,interval.cents_above_base)-3, 104, 2, 10);
       ctx.fillText((interval.cents_above_base - prev).toFixed(2), scaleToCanvas(canvas,prev)+5, 116);
       prev = interval.cents_above_base;
     }
@@ -165,9 +165,8 @@ $(document).ready(function() {
   $('#temperment').mousedown(function(event) {
     var canvas = $('#temperment').get(0);
     var ctx = canvas.getContext("2d");
-    var scaleToCanvas = x => linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
     var scaleFromCanvas = x => linearMapping(x,canvas.width/8,7*canvas.width/8,0,1200);
-    var closest = indexOfSmallest(intervals.map(x => Math.abs(event.offsetX - scaleToCanvas(x.cents_above_base))));
+    var closest = indexOfSmallest(intervals.map(x => Math.abs(event.offsetX - scaleToCanvas(canvas,x.cents_above_base))));
     if(closest[1] < 15) {
       if(20 < event.offsetY && event.offsetY < 50) {
         intervals[closest[0]].in_scale = !intervals[closest[0]].in_scale;
