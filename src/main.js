@@ -247,7 +247,6 @@ $(document).ready(function() {
       $('#play').text("Play");
       sequence.stop(0);
       playing = false;
-      draw();
     }
     intervals = makeTet(tet).map(x => {
       return {cents_above_base: x, in_scale: false};
