@@ -82,10 +82,10 @@ function showGuidelines() {
 }
 
 function highlightSelected() {
-  var canvas = $('#temperment').get(0);
-  var ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#FFFF00";
   if(selected !== false) {
+    var canvas = $('#temperment').get(0);
+    var ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#FFFF00";
     ctx.fillRect(scaleToCanvas(canvas,intervals[selected].cents_above_base)-4, 0, 8, 110);
     ctx.fillRect(scaleToCanvas(canvas,intervals[selected].cents_above_base)-20, 15, 40, 40);
   }
@@ -114,16 +114,44 @@ function showNote(item) {
   }
 }
 
+function showKeyboard() {
+  var canvas = $('#keyboard').get(0);
+  var ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0,0,canvas.width, canvas.height);
+  let scaleIndices = getScaleIndices();
+  let size = canvas.width / (scaleIndices.length+1);
+  range(scaleIndices.length+1).forEach((i) => {
+    let start = i * size;
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(start + 4, 2, size-8, canvas.height-4);
+  });
+  [-1, ...scaleIndices].forEach((item, i) => {
+    ctx.fillStyle = "#FF0000";
+    let accidentals = (scaleIndices[i] || intervals.length) - item;
+    let accidentalSize = size/accidentals;
+    let start = (i + 1/2) * size + accidentalSize/2;
+    range(accidentals-1).forEach((i) => {
+      ctx.fillRect(start + (i*accidentalSize) + 2, 2, accidentalSize-4, canvas.height/2);
+    });
+  });
+}
+
 function draw() {
-  var canvas = $('canvas').get(0);
+  var canvas = $('#temperment').get(0);
   var ctx = canvas.getContext("2d");
   ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  canvas = $('#keyboard').get(0);
+  ctx = canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
   highlightSelected();
   showGuidelines();
   showFundamentalNote();
   intervals.forEach((item) => showNote(item));
   showCents();
-  let scaleIndices = getScaleIndices();
+  showKeyboard();
 }
 
 function linearMapping(x, a, b, c, d) {
