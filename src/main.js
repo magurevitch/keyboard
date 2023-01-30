@@ -25,6 +25,10 @@ function makeScale() {
   return intervals.filter(x => x.in_scale).map(x => x.cents_above_base);
 }
 
+function getScaleIndices() {
+  return intervals.reduce((acc, x, i) => x.in_scale ? [...acc, i] : acc, []);
+}
+
 function makeSequence(sequence) {
   return new Tone.Sequence(function(time, note){
       draw();
@@ -113,7 +117,7 @@ function showNote(item) {
 }
 
 function draw() {
-  var canvas = $('#temperment').get(0);
+  var canvas = $('canvas').get(0);
   var ctx = canvas.getContext("2d");
   ctx.clearRect(0,0,canvas.width,canvas.height);
   highlightSelected();
@@ -121,6 +125,7 @@ function draw() {
   showFundamentalNote();
   intervals.forEach((item) => showNote(item));
   showCents();
+  let scaleIndices = getScaleIndices();
 }
 
 function linearMapping(x, a, b, c, d) {
@@ -206,6 +211,7 @@ $(document).ready(function() {
     if (selected !== false) {
       let snap = parseFloat($('#snap').val());
       snapToNearest(intervals[selected], snap);
+      intervals.sort((a,b) => a.cents_above_base - b.cents_above_base);
       selected = false;
     }
     if(playing) {
