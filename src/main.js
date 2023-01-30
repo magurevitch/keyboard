@@ -30,9 +30,8 @@ function makeSequence(sequence) {
       draw();
       var canvas = $('#temperment').get(0);
       var ctx = canvas.getContext("2d");
-      var scaleToCanvas = x => linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
       ctx.fillStyle = "#FF0000";
-      ctx.fillRect(scaleToCanvas(note)-10, 25, 20, 20);
+      ctx.fillRect(scaleToCanvas(canvas,note)-10, 25, 20, 20);
       let baseNote = parseFloat($('#base').val());
       synth.triggerAttackRelease(centsToPitch(baseNote, note), "4n", time);
   }, sequence, "4n");
@@ -46,19 +45,22 @@ function centsToPitch(baseNote, cents_above_base) {
   return baseNote * Math.pow(2, cents_above_base / 1200);
 }
 
+function scaleToCanvas(canvas, x) {
+  return linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
+}
+
 function showCents() {
   var canvas = $('#temperment').get(0);
   var ctx = canvas.getContext("2d");
-  var scaleToCanvas = x => linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
   ctx.fillStyle = "#0000FF";
   var prev = 0;
   var cents = [];
   for(var interval of intervals) {
     if(interval.in_scale) {
-      ctx.fillRect(scaleToCanvas(prev)+1, 104, 2, 10);
-      ctx.fillRect(scaleToCanvas(prev)+3, 106, scaleToCanvas(interval.cents_above_base)-scaleToCanvas(prev)-5, 2);
+      ctx.fillRect(scaleToCanvas(canvas,prev)+1, 104, 2, 10);
+      ctx.fillRect(scaleToCanvas(canvas,prev)+3, 106, scaleToCanvas(canvas, interval.cents_above_base)-scaleToCanvas(canvas,prev)-5, 2);
       ctx.fillRect(scaleToCanvas(interval.cents_above_base)-3, 104, 2, 10);
-      ctx.fillText((interval.cents_above_base - prev).toFixed(2), scaleToCanvas(prev)+5, 116);
+      ctx.fillText((interval.cents_above_base - prev).toFixed(2), scaleToCanvas(canvas,prev)+5, 116);
       prev = interval.cents_above_base;
     }
   }
@@ -70,11 +72,10 @@ function showGuidelines() {
   var ctx = canvas.getContext("2d");
   ctx.fillStyle = "#FF00FF";
   let baseNote = parseFloat($('#base').val());
-  var scaleToCanvas = x => linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
   guidelines.forEach(item => {
     var cents = item.type === 'hz' ? fractionToCents(item.number, baseNote) : item.type === 'ratio' ? fractionToCents(item.number) : item.number;
-    ctx.fillRect(scaleToCanvas(cents)-1, 0, 2, 105);
-    ctx.fillText(item.number.toFixed(2) + ' ' + item.type, scaleToCanvas(cents)-5, 115);
+    ctx.fillRect(scaleToCanvas(canvas,cents)-1, 0, 2, 105);
+    ctx.fillText(item.number.toFixed(2) + ' ' + item.type, scaleToCanvas(canvas,cents)-5, 115);
   });
 }
 
@@ -82,25 +83,24 @@ function draw() {
   var canvas = $('#temperment').get(0);
   var ctx = canvas.getContext("2d");
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  var scaleToCanvas = x => linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
   ctx.fillStyle = "#FFFF00";
   if(selected !== false) {
-    ctx.fillRect(scaleToCanvas(intervals[selected].cents_above_base)-4, 0, 8, 110);
-    ctx.fillRect(scaleToCanvas(intervals[selected].cents_above_base)-20, 15, 40, 40);
+    ctx.fillRect(scaleToCanvas(canvas,intervals[selected].cents_above_base)-4, 0, 8, 110);
+    ctx.fillRect(scaleToCanvas(canvas,intervals[selected].cents_above_base)-20, 15, 40, 40);
   }
   showGuidelines();
   ctx.fillStyle = "#000000";
-  ctx.fillRect(scaleToCanvas(0)-2, 0, 4, 150);
-  ctx.fillRect(scaleToCanvas(0)-15, 20, 30, 30);
+  ctx.fillRect(scaleToCanvas(canvas,0)-2, 0, 4, 150);
+  ctx.fillRect(scaleToCanvas(canvas,0)-15, 20, 30, 30);
   intervals.forEach((item, i) => {
     ctx.fillStyle = "#000000";
-    ctx.fillRect(scaleToCanvas(item.cents_above_base)-2, 10, 4, 90);
-    ctx.fillRect(scaleToCanvas(item.cents_above_base)-15, 20, 30, 30);
-    ctx.clearRect(scaleToCanvas(item.cents_above_base)-10, 25, 20, 20);
+    ctx.fillRect(scaleToCanvas(canvas,item.cents_above_base)-2, 10, 4, 90);
+    ctx.fillRect(scaleToCanvas(canvas,item.cents_above_base)-15, 20, 30, 30);
+    ctx.clearRect(scaleToCanvas(canvas,item.cents_above_base)-10, 25, 20, 20);
     if(item.in_scale) {
       ctx.fillStyle = "#0000FF";
       ctx.beginPath();
-      ctx.arc(scaleToCanvas(item.cents_above_base), 35, 12, 0,2*Math.PI);
+      ctx.arc(scaleToCanvas(canvas,item.cents_above_base), 35, 12, 0,2*Math.PI);
       ctx.fill();
     }
   });
