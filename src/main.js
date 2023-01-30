@@ -58,17 +58,15 @@ function showCents() {
   var ctx = canvas.getContext("2d");
   ctx.fillStyle = "#0000FF";
   var prev = 0;
-  var cents = [];
-  for(var interval of intervals) {
-    if(interval.in_scale) {
-      ctx.fillRect(scaleToCanvas(canvas,prev)+1, 104, 2, 10);
-      ctx.fillRect(scaleToCanvas(canvas,prev)+3, 106, scaleToCanvas(canvas, interval.cents_above_base)-scaleToCanvas(canvas,prev)-5, 2);
-      ctx.fillRect(scaleToCanvas(canvas,interval.cents_above_base)-3, 104, 2, 10);
-      ctx.fillText((interval.cents_above_base - prev).toFixed(2), scaleToCanvas(canvas,prev)+5, 116);
-      prev = interval.cents_above_base;
-    }
+  let cents = intervals.filter(x => x.in_scale).map(x => x.cents_above_base);
+
+  for(var c of cents) {
+    ctx.fillRect(scaleToCanvas(canvas,prev)+1, 104, 2, 10);
+    ctx.fillRect(scaleToCanvas(canvas,prev)+3, 106, scaleToCanvas(canvas, c)-scaleToCanvas(canvas,prev)-5, 2);
+    ctx.fillRect(scaleToCanvas(canvas,c)-3, 104, 2, 10);
+    ctx.fillText((c - prev).toFixed(2), scaleToCanvas(canvas,prev)+5, 116);
+    prev = c;
   }
-  return cents;
 }
 
 function showGuidelines() {
