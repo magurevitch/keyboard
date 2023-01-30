@@ -89,7 +89,7 @@ function highlightSelected() {
   }
 }
 
-function makeFundamentalNote() {
+function showFundamentalNote() {
   var canvas = $('#temperment').get(0);
   var ctx = canvas.getContext("2d");
   ctx.fillStyle = "#000000";
@@ -97,7 +97,7 @@ function makeFundamentalNote() {
   ctx.fillRect(scaleToCanvas(canvas,0)-15, 20, 30, 30);
 }
 
-function makeNote(item) {
+function showNote(item) {
   var canvas = $('#temperment').get(0);
   var ctx = canvas.getContext("2d");
   ctx.fillStyle = "#000000";
@@ -118,8 +118,8 @@ function draw() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
   highlightSelected();
   showGuidelines();
-  makeFundamentalNote();
-  intervals.forEach((item) => makeNote(item));
+  showFundamentalNote();
+  intervals.forEach((item) => showNote(item));
   showCents();
 }
 
