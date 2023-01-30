@@ -246,6 +246,7 @@ $(document).ready(function() {
     intervals = makeTet(tet).map(x => {
       return {cents_above_base: x, in_scale: false};
     });
+    sequence.stop(0);
     draw();
   });
   $('#base').change(function(event) {
