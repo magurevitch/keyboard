@@ -79,31 +79,47 @@ function showGuidelines() {
   });
 }
 
-function draw() {
+function highlightSelected() {
   var canvas = $('#temperment').get(0);
   var ctx = canvas.getContext("2d");
-  ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.fillStyle = "#FFFF00";
   if(selected !== false) {
     ctx.fillRect(scaleToCanvas(canvas,intervals[selected].cents_above_base)-4, 0, 8, 110);
     ctx.fillRect(scaleToCanvas(canvas,intervals[selected].cents_above_base)-20, 15, 40, 40);
   }
-  showGuidelines();
+}
+
+function makeFundamentalNote() {
+  var canvas = $('#temperment').get(0);
+  var ctx = canvas.getContext("2d");
   ctx.fillStyle = "#000000";
   ctx.fillRect(scaleToCanvas(canvas,0)-2, 0, 4, 150);
   ctx.fillRect(scaleToCanvas(canvas,0)-15, 20, 30, 30);
-  intervals.forEach((item, i) => {
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(scaleToCanvas(canvas,item.cents_above_base)-2, 10, 4, 90);
-    ctx.fillRect(scaleToCanvas(canvas,item.cents_above_base)-15, 20, 30, 30);
-    ctx.clearRect(scaleToCanvas(canvas,item.cents_above_base)-10, 25, 20, 20);
-    if(item.in_scale) {
-      ctx.fillStyle = "#0000FF";
-      ctx.beginPath();
-      ctx.arc(scaleToCanvas(canvas,item.cents_above_base), 35, 12, 0,2*Math.PI);
-      ctx.fill();
-    }
-  });
+}
+
+function makeNote(item) {
+  var canvas = $('#temperment').get(0);
+  var ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(scaleToCanvas(canvas,item.cents_above_base)-2, 10, 4, 90);
+  ctx.fillRect(scaleToCanvas(canvas,item.cents_above_base)-15, 20, 30, 30);
+  ctx.clearRect(scaleToCanvas(canvas,item.cents_above_base)-10, 25, 20, 20);
+  if(item.in_scale) {
+    ctx.fillStyle = "#0000FF";
+    ctx.beginPath();
+    ctx.arc(scaleToCanvas(canvas,item.cents_above_base), 35, 12, 0,2*Math.PI);
+    ctx.fill();
+  }
+}
+
+function draw() {
+  var canvas = $('#temperment').get(0);
+  var ctx = canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  highlightSelected();
+  showGuidelines();
+  makeFundamentalNote();
+  intervals.forEach((item) => makeNote(item));
   showCents();
 }
 
