@@ -11,11 +11,20 @@ function highlightNote(index) {
   let size = kCanvas.width / (scaleIndices.length+1);
   if (index < 0) {
     kCtx.fillRect(0, kCanvas.height/2, size, kCanvas.height/2);
-  } else if (intervals[index].in_scale) {
+  } else if (intervals[index]?.in_scale) {
     let start = (scaleIndices.findIndex(x => x === index)+1) * size;
     kCtx.fillRect(start, kCanvas.height/2, size, kCanvas.height/2);
   } else {
-    //if not in scale
+    let scaleIndex = scaleIndices.findIndex(x => x > index);
+    if(scaleIndex === -1) {
+      scaleIndex = scaleIndices.length;
+    }
+    let aboveIndex = scaleIndex === scaleIndices.length ? intervals.length : scaleIndices[scaleIndex];
+    let numberAccidentals = aboveIndex - (scaleIndex === 0 ? -1 : scaleIndices[scaleIndex-1]);
+    let accidentalsBelowAbove = aboveIndex - index;
+    let accidentalSize = size / numberAccidentals;
+    let baseStart = scaleIndex * size;
+    kCtx.fillRect(baseStart + 3*size/2 - (accidentalsBelowAbove+0.5) * accidentalSize, 2, accidentalSize, kCanvas.height/2);
   }
 }
 
@@ -95,7 +104,7 @@ function showKeyboard() {
   });
   [-1, ...scaleIndices].forEach((item, i) => {
     ctx.fillStyle = "#000000";
-    let accidentals = (scaleIndices[i] || intervals.length) - item;
+    let accidentals = (scaleIndices[i] === undefined ? intervals.length : scaleIndices[i]) - item;
     let accidentalSize = size/accidentals;
     let start = (i + 1/2) * size + accidentalSize/2;
     range(accidentals-1).forEach((i) => {

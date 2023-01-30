@@ -178,8 +178,23 @@ $(document).ready(function() {
   });
   $('#keyboard').click(function(event) {
     let canvas = $('#keyboard').get(0);
-    let findScaleDegree = (x) => linearMapping(x, 0, canvas.width, -1, intervals.filter(x=> x.in_scale).length);
+    let scaleDegree = linearMapping(event.offsetX, 0, canvas.width, -1, intervals.filter(x=> x.in_scale).length);
     let scaleIndices = getScaleIndices();
-    playNote(scaleIndices[Math.floor(findScaleDegree(event.offsetX))] || -1);
+    if(event.offsetY < canvas.height / 2) {
+      let noteBelow = Math.floor(scaleDegree-0.5);
+      if(noteBelow < -1) {
+        playNote(-1);
+      } else {
+        let indexBelow = scaleIndices[noteBelow] === undefined ? -1 : scaleIndices[noteBelow];
+        let indexAbove = scaleIndices[noteBelow+1] === undefined ? intervals.length : scaleIndices[noteBelow+1];
+        let intervalSize = indexAbove-indexBelow;
+        let intervalDegree = intervalSize === 1 ?
+          scaleIndices[Math.floor(scaleDegree)] :
+          Math.floor(linearMapping(scaleDegree-0.5,noteBelow+1/(2*intervalSize),noteBelow+1-1/(2*intervalSize), indexBelow+1, indexAbove));
+        playNote(intervalDegree);
+      }
+    } else {
+      playNote(scaleIndices[Math.floor(scaleDegree)] || -1);
+    }
   });
 });
