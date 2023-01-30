@@ -207,12 +207,12 @@ $(document).ready(function() {
   });
   $('#play').click(function(event) {
     if (playing) {
-      $('#play').text("Play");
+      $('#play').text("Play Scale");
       sequence.stop(0);
       playing = false;
       draw();
     } else {
-      $('#play').text("Stop");
+      $('#play').text("Stop Scale");
       startSequence();
       playing=true;
     }
@@ -244,7 +244,7 @@ $(document).ready(function() {
   $('#make-tet').click(function(event) {
     let tet = parseFloat($('#tet').val());
     if(playing) {
-      $('#play').text("Play");
+      $('#play').text("Play Scale");
       sequence.stop(0);
       playing = false;
     }
