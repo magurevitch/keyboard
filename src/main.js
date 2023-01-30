@@ -136,9 +136,20 @@ $(document).ready(function() {
       playing=true;
     }
   });
+  $('#guideline-type').change((e) => {
+    let type =  $('#guideline-type').val();
+    if (type === 'ratio') {
+      $('#guideline-denom').show();
+    } else {
+      $('#guideline-denom').hide();
+    }
+  })
   $('#add-guideline').click(function(event) {
     let type =  $('#guideline-type').val();
     let number = parseFloat($('#guideline').val());
+    if(type === 'ratio') {
+      number = number / parseFloat($('#guideline-denom').val());
+    }
     if($('#add-object').val() === 'note') {
       let baseNote = parseFloat($('#base').val());
       let cents = type === 'hz' ? fractionToCents(number, baseNote) : type === 'ratio' ? fractionToCents(number) : number;
