@@ -2,7 +2,7 @@ function highlightNote(index) {
   var tCanvas = $('#temperment').get(0);
   var tCtx = tCanvas.getContext("2d");
   tCtx.fillStyle = "#FF0000";
-  tCtx.fillRect(scaleToCanvas(tCanvas, intervals[index]?.cents_above_base || 0)-10, 25, 20, 20);
+  tCtx.fillRect(scaleToTemperment(intervals[index]?.cents_above_base || 0)-10, 25, 20, 20);
 
   var kCanvas = $('#keyboard').get(0);
   var kCtx = kCanvas.getContext("2d");
@@ -27,10 +27,10 @@ function showCents() {
   let cents = intervals.filter(x => x.in_scale).map(x => x.cents_above_base);
 
   for(var c of cents) {
-    ctx.fillRect(scaleToCanvas(canvas,prev)+1, 104, 2, 10);
-    ctx.fillRect(scaleToCanvas(canvas,prev)+3, 106, scaleToCanvas(canvas, c)-scaleToCanvas(canvas,prev)-5, 2);
-    ctx.fillRect(scaleToCanvas(canvas,c)-3, 104, 2, 10);
-    ctx.fillText((c - prev).toFixed(2), scaleToCanvas(canvas,prev)+5, 116);
+    ctx.fillRect(scaleToTemperment(prev)+1, 104, 2, 10);
+    ctx.fillRect(scaleToTemperment(prev)+3, 106, scaleToTemperment(c)-scaleToTemperment(prev)-5, 2);
+    ctx.fillRect(scaleToTemperment(c)-3, 104, 2, 10);
+    ctx.fillText((c - prev).toFixed(2), scaleToTemperment(prev)+5, 116);
     prev = c;
   }
 }
@@ -43,8 +43,8 @@ function showGuidelines() {
   let baseNote = parseFloat($('#base').val());
   guidelines.forEach(item => {
     var cents = item.type === 'hz' ? fractionToCents(item.number, baseNote) : item.type === 'ratio' ? fractionToCents(item.number) : item.number;
-    ctx.fillRect(scaleToCanvas(canvas,cents)-1, 0, 2, 105);
-    ctx.fillText(item.number.toFixed(2) + ' ' + item.type, scaleToCanvas(canvas,cents)-5, 115);
+    ctx.fillRect(scaleToTemperment(cents)-1, 0, 2, 105);
+    ctx.fillText(item.number.toFixed(2) + ' ' + item.type, scaleToTemperment(cents)-5, 115);
   });
 }
 
@@ -53,8 +53,8 @@ function highlightSelected() {
     var canvas = $('#temperment').get(0);
     var ctx = canvas.getContext("2d");
     ctx.fillStyle = "#FFFF00";
-    ctx.fillRect(scaleToCanvas(canvas,intervals[selected].cents_above_base)-4, 0, 8, 110);
-    ctx.fillRect(scaleToCanvas(canvas,intervals[selected].cents_above_base)-20, 15, 40, 40);
+    ctx.fillRect(scaleToTemperment(intervals[selected].cents_above_base)-4, 0, 8, 110);
+    ctx.fillRect(scaleToTemperment(intervals[selected].cents_above_base)-20, 15, 40, 40);
   }
 }
 
@@ -62,21 +62,21 @@ function showFundamentalNote() {
   var canvas = $('#temperment').get(0);
   var ctx = canvas.getContext("2d");
   ctx.fillStyle = "#000000";
-  ctx.fillRect(scaleToCanvas(canvas,0)-2, 0, 4, 150);
-  ctx.fillRect(scaleToCanvas(canvas,0)-15, 20, 30, 30);
+  ctx.fillRect(scaleToTemperment(0)-2, 0, 4, 150);
+  ctx.fillRect(scaleToTemperment(0)-15, 20, 30, 30);
 }
 
 function showNote(item) {
   var canvas = $('#temperment').get(0);
   var ctx = canvas.getContext("2d");
   ctx.fillStyle = "#000000";
-  ctx.fillRect(scaleToCanvas(canvas,item.cents_above_base)-2, 10, 4, 90);
-  ctx.fillRect(scaleToCanvas(canvas,item.cents_above_base)-15, 20, 30, 30);
-  ctx.clearRect(scaleToCanvas(canvas,item.cents_above_base)-10, 25, 20, 20);
+  ctx.fillRect(scaleToTemperment(item.cents_above_base)-2, 10, 4, 90);
+  ctx.fillRect(scaleToTemperment(item.cents_above_base)-15, 20, 30, 30);
+  ctx.clearRect(scaleToTemperment(item.cents_above_base)-10, 25, 20, 20);
   if(item.in_scale) {
     ctx.fillStyle = "#0000FF";
     ctx.beginPath();
-    ctx.arc(scaleToCanvas(canvas,item.cents_above_base), 35, 12, 0,2*Math.PI);
+    ctx.arc(scaleToTemperment(item.cents_above_base), 35, 12, 0,2*Math.PI);
     ctx.fill();
   }
 }

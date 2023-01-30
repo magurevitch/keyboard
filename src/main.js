@@ -1,18 +1,3 @@
-var synth = new Tone.Synth({
-  oscillator: {
-    type: 'sawtooth4',
-    partials: [1, 0.5, 0.25, 0.125, 0.0625]
-  },
-  envelope: {
-    attack : 0.01 ,
-    decay : 0.03,
-    sustain : 0.2 ,
-    release : 0 ,
-    attackCurve : 'linear' ,
-    decayCurve : 'linear' ,
-    releaseCurve : 'exponential'
-  }
-}).toMaster();
 var sequence = null;
 var playing = false;
 var intervals = makeTet(12).map(x => {
@@ -30,15 +15,6 @@ function makeScale() {
   return [-1, ...indices, ...indices.slice(0, indices.length-1).reverse(), -1];
 }
 
-function makeSequence(scale) {
-  return new Tone.Sequence(function(time, index){
-      draw();
-      highlightNote(index);
-      let baseNote = parseFloat($('#base').val());
-      synth.triggerAttackRelease(centsToPitch(baseNote, intervals[index]?.cents_above_base || 0), "4n", time);
-  }, scale, "4n");
-};
-
 function fractionToCents(a, b) {
   return 1200 * Math.log2(b ? a/b : a);
 }
@@ -47,7 +23,8 @@ function centsToPitch(baseNote, cents_above_base) {
   return baseNote * Math.pow(2, cents_above_base / 1200);
 }
 
-function scaleToCanvas(canvas, x) {
+function scaleToTemperment(x) {
+  let canvas = $('#temperment').get(0);
   return linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
 }
 
@@ -108,7 +85,7 @@ $(document).ready(function() {
   $('#temperment').mousedown(function(event) {
     var canvas = $('#temperment').get(0);
     var scaleFromCanvas = x => linearMapping(x,canvas.width/8,7*canvas.width/8,0,1200);
-    var closest = indexOfSmallest(intervals.map(x => Math.abs(event.offsetX - scaleToCanvas(canvas,x.cents_above_base))));
+    var closest = indexOfSmallest(intervals.map(x => Math.abs(event.offsetX - scaleToTemperment(x.cents_above_base))));
     if(closest[1] < 15) {
       if(20 < event.offsetY && event.offsetY < 50) {
         intervals[closest[0]].in_scale = !intervals[closest[0]].in_scale;
@@ -198,5 +175,11 @@ $(document).ready(function() {
   });
   $('#base').change(function(event) {
     draw();
+  });
+  $('#keyboard').click(function(event) {
+    let canvas = $('#keyboard').get(0);
+    let findScaleDegree = (x) => linearMapping(x, 0, canvas.width, -1, intervals.filter(x=> x.in_scale).length);
+    let scaleIndices = getScaleIndices();
+    playNote(scaleIndices[Math.floor(findScaleDegree(event.offsetX))] || -1);
   });
 });
