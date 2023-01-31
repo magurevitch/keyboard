@@ -44,7 +44,6 @@ function showCents() {
   }
 }
 
-
 function showGuidelines() {
   var canvas = $('#temperment').get(0);
   var ctx = canvas.getContext("2d");
@@ -128,4 +127,25 @@ function draw() {
   intervals.forEach((item) => showNote(item));
   showCents();
   showKeyboard();
+}
+
+function drawEnvelope(envelope) {
+  let canvas = $('#envelope').get(0);
+  let ctx = canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  let fit = (x) => linearMapping(x, 0, 4, 0, canvas.width);
+
+  ctx.fillStyle = "#000000";
+  ctx.beginPath();
+  ctx.moveTo(0, canvas.height);
+  if(envelope.attackCurve === "linear") {
+    ctx.lineTo(fit(envelope.attack), 0);
+  } else {
+    ctx.quadraticCurveTo(fit(envelope.attack),canvas.height,fit(envelope.attack), 0);
+  }
+  ctx.lineTo(fit(envelope.attack+envelope.decay), (1-envelope.sustain)*canvas.height);
+  ctx.lineTo(fit(4-envelope.release), (1-envelope.sustain)*canvas.height);
+  ctx.lineTo(canvas.width, canvas.height);
+  ctx.stroke();
 }

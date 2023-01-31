@@ -1,18 +1,4 @@
-var synth = new Tone.FMSynth({
-  oscillator: {
-    type: 'square',
-    partials: [1, 0.5, 0.25, 0.125, 0.0625]
-  },
-  envelope: {
-    attack : 0.01 ,
-    decay : 0.03,
-    sustain : 0.2 ,
-    release : 0 ,
-    attackCurve : 'linear' ,
-    decayCurve : 'linear' ,
-    releaseCurve : 'exponential'
-  }
-}).toDestination();
+var synth = new Tone.Synth().toDestination();
 
 function makeSequence(scale) {
   return new Tone.Sequence(function(time, index) {
@@ -29,3 +15,31 @@ function playNote(index) {
   let baseNote = parseFloat($('#base').val());
   synth.triggerAttackRelease(centsToPitch(baseNote, intervals[index]?.cents_above_base || 0), "4n");
 }
+
+$(document).ready(function() {
+  $('#attack').change(() => {
+    let val = parseFloat($('#attack').val());
+    console.log(synth, synth.envelope)
+    synth.envelope.attack = val;
+    drawEnvelope(synth.envelope);
+    playNote(-1);
+  });
+  $('#decay').change(() => {
+    let val = parseFloat($('#decay').val());
+    synth.envelope.decay = val;
+    drawEnvelope(synth.envelope);
+    playNote(-1);
+  });
+  $('#sustain').change(() => {
+    let val = parseFloat($('#sustain').val());
+    synth.envelope.sustain = val;
+    drawEnvelope(synth.envelope);
+    playNote(-1);
+  });
+  $('#release').change(() => {
+    let val = parseFloat($('#release').val());
+    synth.envelope.release = val;
+    drawEnvelope(synth.envelope);
+    playNote(-1);
+  });
+});
