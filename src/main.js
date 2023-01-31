@@ -205,7 +205,7 @@ $(document).ready(function() {
         playNote(intervalDegree);
       }
     } else {
-      playNote(scaleIndices[Math.floor(scaleDegree)] || -1);
+      playNote(scaleIndices[Math.floor(scaleDegree)] === undefined ? -1 : scaleIndices[Math.floor(scaleDegree)]);
     }
   });
 });
