@@ -16,30 +16,37 @@ function playNote(index) {
   synth.triggerAttackRelease(centsToPitch(baseNote, intervals[index]?.cents_above_base || 0), "4n");
 }
 
+function makeKnob(name, hasCurve) {
+  $('#envelope').append(`<div>
+          ${name}
+          <input type="number" id="${name}" min=0 max=1 step=0.1 value=${synth.envelope[name]}>
+          ${hasCurve ? `<select id="${name}-curve">
+            <option value="linear">linear</option>
+            <option value="exponential">exponential</option>
+          </select>` : ""}
+        </div>`);
+  $(`#${name}`).change(() => {
+    let val = parseFloat($(`#${name}`).val());
+    synth.envelope[name] = val;
+    drawEnvelope(synth.envelope);
+    playNote(-1);
+  });
+  if (hasCurve) {
+    synth.envelope[`${name}Curve`] = "linear";
+    $(`#${name}-curve`).change(() => {
+      let val = $(`#${name}-curve`).val();
+      synth.envelope[`${name}Curve`] = val;
+      drawEnvelope(synth.envelope);
+      playNote(-1);
+    });
+  }
+}
+
 $(document).ready(function() {
-  $('#attack').change(() => {
-    let val = parseFloat($('#attack').val());
-    console.log(synth, synth.envelope)
-    synth.envelope.attack = val;
-    drawEnvelope(synth.envelope);
-    playNote(-1);
-  });
-  $('#decay').change(() => {
-    let val = parseFloat($('#decay').val());
-    synth.envelope.decay = val;
-    drawEnvelope(synth.envelope);
-    playNote(-1);
-  });
-  $('#sustain').change(() => {
-    let val = parseFloat($('#sustain').val());
-    synth.envelope.sustain = val;
-    drawEnvelope(synth.envelope);
-    playNote(-1);
-  });
-  $('#release').change(() => {
-    let val = parseFloat($('#release').val());
-    synth.envelope.release = val;
-    drawEnvelope(synth.envelope);
-    playNote(-1);
-  });
+  makeKnob('attack', true);
+  makeKnob('decay', true);
+  makeKnob('sustain');
+  makeKnob('release', true);
+  drawEnvelope(synth.envelope);
+  console.log(synth.oscillator)
 });

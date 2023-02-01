@@ -130,11 +130,11 @@ function draw() {
 }
 
 function drawEnvelope(envelope) {
-  let canvas = $('#envelope').get(0);
+  let canvas = $('#envelope-canvas').get(0);
   let ctx = canvas.getContext("2d");
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  let fit = (x) => linearMapping(x, 0, 4, 0, canvas.width);
+  let fit = (x) => linearMapping(x, 0, 3, 0, canvas.width);
 
   ctx.fillStyle = "#000000";
   ctx.beginPath();
@@ -142,10 +142,18 @@ function drawEnvelope(envelope) {
   if(envelope.attackCurve === "linear") {
     ctx.lineTo(fit(envelope.attack), 0);
   } else {
-    ctx.quadraticCurveTo(fit(envelope.attack),canvas.height,fit(envelope.attack), 0);
+    ctx.quadraticCurveTo(0,0,fit(envelope.attack), 0);
   }
-  ctx.lineTo(fit(envelope.attack+envelope.decay), (1-envelope.sustain)*canvas.height);
-  ctx.lineTo(fit(4-envelope.release), (1-envelope.sustain)*canvas.height);
-  ctx.lineTo(canvas.width, canvas.height);
+  if(envelope.decayCurve === "linear") {
+    ctx.lineTo(fit(envelope.attack+envelope.decay), (1-envelope.sustain)*canvas.height);
+  } else {
+    ctx.quadraticCurveTo(fit(envelope.attack),(1-envelope.sustain)*canvas.height,fit(envelope.attack+envelope.decay),(1-envelope.sustain)*canvas.height);
+  }
+  ctx.lineTo(fit(3-envelope.release), (1-envelope.sustain)*canvas.height);
+  if(envelope.releaseCurve === "linear") {
+    ctx.lineTo(canvas.width, canvas.height);
+  } else {
+    ctx.quadraticCurveTo(fit(3-envelope.release),canvas.height,canvas.width,canvas.height);
+  }
   ctx.stroke();
 }
