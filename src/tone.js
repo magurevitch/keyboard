@@ -1,4 +1,6 @@
 var synth = new Tone.Synth().toDestination();
+Tone.Transport.start(0);
+
 
 function makeSequence(scale) {
   return new Tone.Sequence(function(time, index) {
@@ -14,6 +16,9 @@ function playNote(index) {
   highlightNote(index);
   let baseNote = parseFloat($('#base').val());
   synth.triggerAttackRelease(centsToPitch(baseNote, intervals[index]?.cents_above_base || 0), "4n");
+  Tone.Transport.schedule(function(time){
+	  draw();
+  }, Tone.Transport.seconds + 1.5);
 }
 
 function makeKnob(name, hasCurve) {
@@ -48,5 +53,4 @@ $(document).ready(function() {
   makeKnob('sustain');
   makeKnob('release', true);
   drawEnvelope(synth.envelope);
-  console.log(synth.oscillator)
 });
