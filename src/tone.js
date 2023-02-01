@@ -1,6 +1,6 @@
 var synth = new Tone.Synth().toDestination();
+Tone.Transport.scheduleRepeat((time) => drawOscillator(time), 1);
 Tone.Transport.start(0);
-
 
 function makeSequence(scale) {
   return new Tone.Sequence(function(time, index) {
@@ -53,4 +53,5 @@ $(document).ready(function() {
   makeKnob('sustain');
   makeKnob('release', true);
   drawEnvelope(synth.envelope);
+  drawOscillator(0);
 });
