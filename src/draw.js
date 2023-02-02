@@ -165,10 +165,6 @@ const WAVE_FUNCTIONS = {
   'sawtooth': (frequency, amplitude) => (x) => amplitude * (x*frequency % 1) - amplitude/2
 };
 
-function fsum(funcs) {
-  return (x) => funcs.map(f => f(x)).reduce((a,b)=>a+b, 0);
-}
-
 function drawOscillator(oscillator, time) {
   let canvas = $('#oscillator').get(0);
   let ctx = canvas.getContext("2d");

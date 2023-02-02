@@ -47,6 +47,22 @@ function makeKnob(name, hasCurve) {
   }
 }
 
+const HARMONICS = {
+  1: "Fundamental",
+  2: "Perfect 5th",
+  3: "Major 2nd",
+  4: "Major 6th",
+  5: "Major 3rd",
+  6: "Major 7th",
+  7: "Tritone",
+  8: "Minor 2nd",
+  9: "Minor 6th",
+  10: "Minor 3rd",
+  11: "Minor 7th",
+  12: "Perfect 4th",
+  13: "Pythagorean Comma"
+};
+
 $(document).ready(function() {
   makeKnob('attack', true);
   makeKnob('decay', true);
@@ -57,8 +73,21 @@ $(document).ready(function() {
   $('#oscillator-type').change(() => {
     let val = $('#oscillator-type').val();
     if (val === 'partials') {
-      synth.oscillator.partials = [1,0,-1,0,1]
+      synth.oscillator.partials = [1,0,1,0,1,0,1,0,1,0,1,0,1];
+      range(1,14).forEach((item) => {
+        $('#partials').append(`<div>${item} (${HARMONICS[item]}) <input type="number" id="harmonic-${item}" min=-1 max=1 step=0.1 value="${item%2}"></div>`);
+        $(`#harmonic-${item}`).change(() => {
+          let val = parseFloat($(`#harmonic-${item}`).val());
+          let newPartials = [...synth.oscillator.partials];
+          newPartials.splice(item-1, 1, val);
+          synth.oscillator.partials = newPartials;
+          drawOscillator(synth.oscillator);
+          playNote(-1);
+        });
+      });
+
     } else {
+      $('#partials').empty();
       synth.oscillator.type = val;
     }
     drawOscillator(synth.oscillator);

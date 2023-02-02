@@ -6,6 +6,10 @@ var intervals = makeTet(12).map(x => {
 var selected = false;
 var guidelines = [{number: 2, type: 'ratio'}];
 
+function fsum(funcs) {
+  return (x) => funcs.map(f => f(x)).reduce((a,b)=>a+b, 0);
+}
+
 function getScaleIndices() {
   return intervals.reduce((acc, x, i) => x.in_scale ? [...acc, i] : acc, []);
 }
