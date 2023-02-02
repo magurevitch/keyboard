@@ -56,7 +56,11 @@ $(document).ready(function() {
   drawOscillator(synth.oscillator, 0);
   $('#oscillator-type').change(() => {
     let val = $('#oscillator-type').val();
-    synth.oscillator.type = val;
+    if (val === 'partials') {
+      synth.oscillator.partials = [1,0,-1,0,1]
+    } else {
+      synth.oscillator.type = val;
+    }
     drawOscillator(synth.oscillator);
     playNote(-1);
   });

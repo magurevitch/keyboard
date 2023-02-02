@@ -159,24 +159,30 @@ function drawEnvelope(envelope) {
 }
 
 const WAVE_FUNCTIONS = {
-  'sine': (frequency, amplitude) => (x) => amplitude/2 + (1/2 * amplitude * Math.sin(x*2*Math.PI*frequency)),
-  'square': (frequency, amplitude) => (x) => amplitude * (x*2*frequency % 2 < 1 ? 1 : 0),
-  'triangle': (frequency, amplitude) => (x) =>  amplitude * Math.abs((2*x*frequency % 2) - 1),
-  'sawtooth': (frequency, amplitude) => (x) => amplitude * (x*frequency % 1)
+  'sine': (frequency, amplitude) => (x) => (amplitude/2 * Math.sin(x*2*Math.PI*frequency)),
+  'square': (frequency, amplitude) => (x) => (x*frequency % 2) < 1 ? amplitude/2 : -amplitude/2,
+  'triangle': (frequency, amplitude) => (x) =>  amplitude * Math.abs((2*x*frequency % 2) - 1) - amplitude/2,
+  'sawtooth': (frequency, amplitude) => (x) => amplitude * (x*frequency % 1) - amplitude/2
 };
+
+function fsum(funcs) {
+  return (x) => funcs.map(f => f(x)).reduce((a,b)=>a+b, 0);
+}
 
 function drawOscillator(oscillator, time) {
   let canvas = $('#oscillator').get(0);
   let ctx = canvas.getContext("2d");
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  let waveFunction = WAVE_FUNCTIONS[oscillator.type](2/canvas.width,-canvas.height);
+  let waveFunction = oscillator.partials.length === 0 ?
+      WAVE_FUNCTIONS[oscillator.type](2/canvas.width,-canvas.height) :
+      fsum(oscillator.partials.map((partial, index) => (x) => -canvas.height * partial * Math.sin(x*4*Math.PI*(index+1)/ canvas.width) / (2*oscillator.partials.reduce((a,b)=>a+Math.abs(b), 0))));
 
   ctx.fillStyle = "#000000";
   ctx.beginPath();
   ctx.moveTo(0, canvas.height/2);
   for (let i = 0; i<canvas.width; i++) {
-    ctx.lineTo(i, canvas.height+waveFunction(i+time));
+    ctx.lineTo(i, canvas.height/2+waveFunction(i+time));
   }
   ctx.stroke();
 }
