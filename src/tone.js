@@ -49,18 +49,21 @@ function makeKnob(name, hasCurve) {
 
 const HARMONICS = {
   1: "Fundamental",
-  2: "Perfect 5th",
-  3: "Major 2nd",
-  4: "Major 6th",
+  2: "Octave",
+  3: "Perfect 5th",
+  4: "Octave",
   5: "Major 3rd",
-  6: "Major 7th",
-  7: "Tritone",
-  8: "Minor 2nd",
-  9: "Minor 6th",
-  10: "Minor 3rd",
-  11: "Minor 7th",
-  12: "Perfect 4th",
-  13: "Pythagorean Comma"
+  6: "Perfect 5th",
+  7: "Harmonic 7th",
+  8: "Octave",
+  9: "Major 2nd",
+  10: "Major 3rd",
+  11: "Tritone",
+  12: "Perfect 5th",
+  13: "Neutral 6th",
+  14: "Harmonic 7th",
+  15: "Major 7th",
+  16: "Octave"
 };
 
 $(document).ready(function() {
@@ -73,9 +76,9 @@ $(document).ready(function() {
   $('#oscillator-type').change(() => {
     let val = $('#oscillator-type').val();
     if (val === 'partials') {
-      synth.oscillator.partials = [1,0,1,0,1,0,1,0,1,0,1,0,1];
-      range(1,14).forEach((item) => {
-        $('#partials').append(`<div class="flex-child">${item} (${HARMONICS[item]}) <input type="number" id="harmonic-${item}" min=-1 max=1 step=0.1 value="${item%2}"></div>`);
+      synth.oscillator.partials = new Array(16).fill(1);
+      range(1,17).forEach((item) => {
+        $('#partials').append(`<div class="flex-child">${item} (${HARMONICS[item]}) <input type="number" id="harmonic-${item}" min=-1 max=1 step=0.1 value=1></div>`);
         $(`#harmonic-${item}`).change(() => {
           let val = parseFloat($(`#harmonic-${item}`).val());
           let newPartials = [...synth.oscillator.partials];
