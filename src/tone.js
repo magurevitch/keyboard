@@ -1,5 +1,5 @@
 var synth = new Tone.Synth().toDestination();
-Tone.Transport.scheduleRepeat((time) => drawOscillator(time), 1);
+Tone.Transport.scheduleRepeat((time) => drawOscillator(synth.oscillator, time), 1);
 Tone.Transport.start(0);
 
 function makeSequence(scale) {
@@ -53,5 +53,11 @@ $(document).ready(function() {
   makeKnob('sustain');
   makeKnob('release', true);
   drawEnvelope(synth.envelope);
-  drawOscillator(0);
+  drawOscillator(synth.oscillator, 0);
+  $('#oscillator-type').change(() => {
+    let val = $('#oscillator-type').val();
+    synth.oscillator.type = val;
+    drawOscillator(synth.oscillator);
+    playNote(-1);
+  });
 });

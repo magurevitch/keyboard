@@ -159,21 +159,24 @@ function drawEnvelope(envelope) {
 }
 
 const WAVE_FUNCTIONS = {
-  'sine': (frequency, amplitude) => (x) => amplitude * Math.sin(x*2*Math.PI*frequency),
+  'sine': (frequency, amplitude) => (x) => amplitude/2 + (1/2 * amplitude * Math.sin(x*2*Math.PI*frequency)),
+  'square': (frequency, amplitude) => (x) => amplitude * (x*2*frequency % 2 < 1 ? 1 : 0),
+  'triangle': (frequency, amplitude) => (x) =>  amplitude * Math.abs((2*x*frequency % 2) - 1),
+  'sawtooth': (frequency, amplitude) => (x) => amplitude * (x*frequency % 1)
 };
 
-function drawOscillator(time) {
+function drawOscillator(oscillator, time) {
   let canvas = $('#oscillator').get(0);
   let ctx = canvas.getContext("2d");
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  let waveFunction = WAVE_FUNCTIONS['sine'](2/canvas.width,-canvas.height/2);
+  let waveFunction = WAVE_FUNCTIONS[oscillator.type](2/canvas.width,-canvas.height);
 
   ctx.fillStyle = "#000000";
   ctx.beginPath();
   ctx.moveTo(0, canvas.height/2);
   for (let i = 0; i<canvas.width; i++) {
-    ctx.lineTo(i, canvas.height/2 + waveFunction(i+time));
+    ctx.lineTo(i, canvas.height+waveFunction(i+time));
   }
   ctx.stroke();
 }
