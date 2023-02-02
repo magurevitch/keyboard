@@ -44,7 +44,6 @@ function showCents() {
   }
 }
 
-
 function showGuidelines() {
   var canvas = $('#temperment').get(0);
   var ctx = canvas.getContext("2d");
@@ -128,4 +127,58 @@ function draw() {
   intervals.forEach((item) => showNote(item));
   showCents();
   showKeyboard();
+}
+
+function drawEnvelope(envelope) {
+  let canvas = $('#envelope-canvas').get(0);
+  let ctx = canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  let fit = (x) => linearMapping(x, 0, 3, 0, canvas.width);
+
+  ctx.fillStyle = "#000000";
+  ctx.beginPath();
+  ctx.moveTo(0, canvas.height);
+  if(envelope.attackCurve === "linear") {
+    ctx.lineTo(fit(envelope.attack), 0);
+  } else {
+    ctx.quadraticCurveTo(0,0,fit(envelope.attack), 0);
+  }
+  if(envelope.decayCurve === "linear") {
+    ctx.lineTo(fit(envelope.attack+envelope.decay), (1-envelope.sustain)*canvas.height);
+  } else {
+    ctx.quadraticCurveTo(fit(envelope.attack),(1-envelope.sustain)*canvas.height,fit(envelope.attack+envelope.decay),(1-envelope.sustain)*canvas.height);
+  }
+  ctx.lineTo(fit(3-envelope.release), (1-envelope.sustain)*canvas.height);
+  if(envelope.releaseCurve === "linear") {
+    ctx.lineTo(canvas.width, canvas.height);
+  } else {
+    ctx.quadraticCurveTo(fit(3-envelope.release),canvas.height,canvas.width,canvas.height);
+  }
+  ctx.stroke();
+}
+
+const WAVE_FUNCTIONS = {
+  'sine': (frequency, amplitude) => (x) => (amplitude/2 * Math.sin(x*2*Math.PI*frequency)),
+  'square': (frequency, amplitude) => (x) => (x*frequency % 2) < 1 ? amplitude/2 : -amplitude/2,
+  'triangle': (frequency, amplitude) => (x) =>  amplitude * Math.abs((2*x*frequency % 2) - 1) - amplitude/2,
+  'sawtooth': (frequency, amplitude) => (x) => amplitude * (x*frequency % 1) - amplitude/2
+};
+
+function drawOscillator(oscillator, time, frequency) {
+  let canvas = $('#oscillator').get(0);
+  let ctx = canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  let waveFunction = oscillator.partials.length === 0 ?
+      WAVE_FUNCTIONS[oscillator.type](2/canvas.width,-canvas.height) :
+      fsum(oscillator.partials.map((partial, index) => (x) => -canvas.height * partial * Math.sin(x*4*Math.PI*(index+1)/ canvas.width) / (2*oscillator.partials.reduce((a,b)=>a+Math.abs(b), 0))));
+
+  ctx.fillStyle = "#000000";
+  ctx.beginPath();
+  ctx.moveTo(0, canvas.height/2);
+  for (let i = 0; i<canvas.width; i++) {
+    ctx.lineTo(i, canvas.height/2+waveFunction(((frequency || 1) * i)+time));
+  }
+  ctx.stroke();
 }

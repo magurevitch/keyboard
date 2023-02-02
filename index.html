@@ -43,5 +43,21 @@
       <button id="make-tet">Make Equal Tone</button>
     </div>
     <button id="play">Play</button>
+    <div class="flex-container">
+      <div id="envelope" class="flex-child">
+        <canvas height="120" width="400" id="envelope-canvas"></canvas>
+      </div>
+      <div class="flex-child">
+        <canvas height="120" width="400" id="oscillator"></canvas>
+        <select id="oscillator-type">
+            <option value="triangle">triangle</option>
+            <option value="square">square</option>
+            <option value="sine">sine</option>
+            <option value="sawtooth">sawtooth</option>
+            <option value="partials">partials</option>
+        </select>
+        <div id="partials" class="flex-container"></div>
+    </div>
+    </div>
   </body>
 </html>

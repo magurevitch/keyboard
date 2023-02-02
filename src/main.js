@@ -6,6 +6,10 @@ var intervals = makeTet(12).map(x => {
 var selected = false;
 var guidelines = [{number: 2, type: 'ratio'}];
 
+function fsum(funcs) {
+  return (x) => funcs.map(f => f(x)).reduce((a,b)=>a+b, 0);
+}
+
 function getScaleIndices() {
   return intervals.reduce((acc, x, i) => x.in_scale ? [...acc, i] : acc, []);
 }
@@ -19,8 +23,8 @@ function fractionToCents(a, b) {
   return 1200 * Math.log2(b ? a/b : a);
 }
 
-function centsToPitch(baseNote, cents_above_base) {
-  return baseNote * Math.pow(2, cents_above_base / 1200);
+function centsToFraction(cents_above_base) {
+  return Math.pow(2, cents_above_base / 1200);
 }
 
 function scaleToTemperment(x) {
@@ -94,7 +98,7 @@ $(document).ready(function() {
       }
     } else {
       var cents = scaleFromCanvas(event.offsetX);
-      var position = cents < intervals[closest[0]].cents_above_base ? closest[0] : closest[0] + 1;
+      var position = cents < intervals[closest[0]]?.cents_above_base ? closest[0] : closest[0] + 1;
       intervals.splice(position, 0, {cents_above_base: cents, in_scale: false});
     }
     draw();
@@ -154,7 +158,7 @@ $(document).ready(function() {
       let baseNote = parseFloat($('#base').val());
       let cents = type === 'hz' ? fractionToCents(number, baseNote) : type === 'ratio' ? fractionToCents(number) : number;
       var closest = indexOfSmallest(intervals.map(x => Math.abs(cents - x.cents_above_base)));
-      var position = cents < intervals[closest[0]].cents_above_base ? closest[0] : closest[0] + 1;
+      var position = cents < intervals[closest[0]]?.cents_above_base ? closest[0] : closest[0] + 1;
       intervals.splice(position, 0, {cents_above_base: cents, in_scale: false});
     } else {
       guidelines.push({number: number, type: type});
