@@ -165,7 +165,7 @@ const WAVE_FUNCTIONS = {
   'sawtooth': (frequency, amplitude) => (x) => amplitude * (x*frequency % 1) - amplitude/2
 };
 
-function drawOscillator(oscillator, time) {
+function drawOscillator(oscillator, time, frequency) {
   let canvas = $('#oscillator').get(0);
   let ctx = canvas.getContext("2d");
   ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -178,7 +178,7 @@ function drawOscillator(oscillator, time) {
   ctx.beginPath();
   ctx.moveTo(0, canvas.height/2);
   for (let i = 0; i<canvas.width; i++) {
-    ctx.lineTo(i, canvas.height/2+waveFunction(i+time));
+    ctx.lineTo(i, canvas.height/2+waveFunction(((frequency || 1) * i)+time));
   }
   ctx.stroke();
 }

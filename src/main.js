@@ -23,8 +23,8 @@ function fractionToCents(a, b) {
   return 1200 * Math.log2(b ? a/b : a);
 }
 
-function centsToPitch(baseNote, cents_above_base) {
-  return baseNote * Math.pow(2, cents_above_base / 1200);
+function centsToFraction(cents_above_base) {
+  return Math.pow(2, cents_above_base / 1200);
 }
 
 function scaleToTemperment(x) {

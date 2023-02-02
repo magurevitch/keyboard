@@ -1,24 +1,27 @@
 var synth = new Tone.Synth().toDestination();
-Tone.Transport.scheduleRepeat((time) => drawOscillator(synth.oscillator, time), 1);
+Tone.Transport.scheduleRepeat((time) => drawOscillator(synth.oscillator, time, frequency), 1/60);
 Tone.Transport.start(0);
+
+let frequency = 1;
 
 function makeSequence(scale) {
   return new Tone.Sequence(function(time, index) {
-      draw();
-      highlightNote(index);
-      let baseNote = parseFloat($('#base').val());
-      synth.triggerAttackRelease(centsToPitch(baseNote, intervals[index]?.cents_above_base || 0), "4n", time);
+    playNote(index, time, true);
   }, scale, "4n");
 };
 
-function playNote(index) {
+function playNote(index, time, noRedraw) {
   draw();
   highlightNote(index);
+  let ratio = centsToFraction(intervals[index]?.cents_above_base || 0);
+  frequency = ratio;
   let baseNote = parseFloat($('#base').val());
-  synth.triggerAttackRelease(centsToPitch(baseNote, intervals[index]?.cents_above_base || 0), "4n");
-  Tone.Transport.schedule(function(time){
-	  draw();
-  }, Tone.Transport.seconds + 1.5);
+  synth.triggerAttackRelease(baseNote * ratio, "4n", time);
+  if(!noRedraw) {
+    Tone.Transport.schedule(function(time) {
+      draw();
+    }, Tone.Transport.seconds + 1.5);
+  }
 }
 
 function makeKnob(name, hasCurve) {
@@ -72,7 +75,7 @@ $(document).ready(function() {
   makeKnob('sustain');
   makeKnob('release', true);
   drawEnvelope(synth.envelope);
-  drawOscillator(synth.oscillator, 0);
+  drawOscillator(synth.oscillator, 0, frequency);
   $('#oscillator-type').change(() => {
     let val = $('#oscillator-type').val();
     if (val === 'partials') {
@@ -84,7 +87,6 @@ $(document).ready(function() {
           let newPartials = [...synth.oscillator.partials];
           newPartials.splice(item-1, 1, val);
           synth.oscillator.partials = newPartials;
-          drawOscillator(synth.oscillator);
           playNote(-1);
         });
       });
@@ -93,7 +95,6 @@ $(document).ready(function() {
       $('#partials').empty();
       synth.oscillator.type = val;
     }
-    drawOscillator(synth.oscillator);
     playNote(-1);
   });
 });
