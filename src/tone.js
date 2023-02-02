@@ -75,7 +75,7 @@ $(document).ready(function() {
     if (val === 'partials') {
       synth.oscillator.partials = [1,0,1,0,1,0,1,0,1,0,1,0,1];
       range(1,14).forEach((item) => {
-        $('#partials').append(`<div>${item} (${HARMONICS[item]}) <input type="number" id="harmonic-${item}" min=-1 max=1 step=0.1 value="${item%2}"></div>`);
+        $('#partials').append(`<div class="flex-child">${item} (${HARMONICS[item]}) <input type="number" id="harmonic-${item}" min=-1 max=1 step=0.1 value="${item%2}"></div>`);
         $(`#harmonic-${item}`).change(() => {
           let val = parseFloat($(`#harmonic-${item}`).val());
           let newPartials = [...synth.oscillator.partials];
