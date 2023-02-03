@@ -34,26 +34,25 @@ function normalizeGuideline(item) {
   return item.type === 'hz' ? fractionToCents(item.number, baseNote) : item.type === 'ratio' ? fractionToCents(item.number) : item.number;
 }
 
-function snapNote(note, guides, distance) {
+function nearestGuide(note, guides, distance) {
   var closest = indexOfSmallest(guides.map(x => Math.abs(note.cents_above_base - x)));
   if(closest[1] < distance) {
-    note.cents_above_base = guides[closest[0]];
+    return guides[closest[0]];
   }
-}
-
-function snapToNearestGridline(note, snap) {
-  let closeMultiple = note.cents_above_base - (note.cents_above_base % snap);
-  snapNote(note, [closeMultiple, closeMultiple + snap], snap);
+  return null;
 }
 
 function snapToNearest(note) {
   let type = $('#snap-type').val();
   let snap = parseFloat($('#snap').val());
+  let closest;
   if (type === 'cents') {
-    snapToNearestGridline(note,snap);
+    let closeMultiple = note.cents_above_base - (note.cents_above_base % snap);
+    closest = nearestGuide(note, [closeMultiple, closeMultiple + snap], snap);
   } else {
-    snapNote(note, guidelines.map(item => normalizeGuideline(item)), snap);
+    closest = nearestGuide(note, guidelines.map(item => normalizeGuideline(item)), snap);
   }
+  note.cents_above_base = closest || note.cents_above_base;
 }
 
 $(document).ready(function() {
