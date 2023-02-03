@@ -6,10 +6,6 @@ var intervals = makeTet(12).map(x => {
 var selected = false;
 var guidelines = [{number: 2, type: 'ratio'}];
 
-function fsum(funcs) {
-  return (x) => funcs.map(f => f(x)).reduce((a,b)=>a+b, 0);
-}
-
 function getScaleIndices() {
   return intervals.reduce((acc, x, i) => x.in_scale ? [...acc, i] : acc, []);
 }
@@ -19,33 +15,9 @@ function makeScale() {
   return [-1, ...indices, ...indices.slice(0, indices.length-1).reverse(), -1];
 }
 
-function fractionToCents(a, b) {
-  return 1200 * Math.log2(b ? a/b : a);
-}
-
-function centsToFraction(cents_above_base) {
-  return Math.pow(2, cents_above_base / 1200);
-}
-
 function scaleToTemperment(x) {
   let canvas = $('#temperment').get(0);
   return linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
-}
-
-function linearMapping(x, a, b, c, d) {
-  return (x-a)*(d-c)/(b-a) + c;
-}
-
-function range(start, finish) {
-  if(!finish) {
-    finish = start;
-    start = 0;
-  }
-  var array = [];
-  for(var i=start;i<finish; i++) {
-    array.push(i);
-  }
-  return array;
 }
 
 function makeTet(number) {
@@ -54,14 +26,6 @@ function makeTet(number) {
 
 function makePythagorean(ratio, comma) {
   return [];
-}
-
-function indexOfSmallest(a) {
- var lowest = 0;
- for (var i = 1; i < a.length; i++) {
-  if (a[i] < a[lowest]) lowest = i;
- }
- return [lowest, a[lowest]];
 }
 
 function snapNote(note, guides, distance) {
@@ -74,14 +38,6 @@ function snapNote(note, guides, distance) {
 function snapToNearest(note, snap) {
   let closeMultiple = note.cents_above_base - (note.cents_above_base % snap);
   snapNote(note, [closeMultiple, closeMultiple + snap], snap);
-}
-
-function startSequence() {
-  let scale = makeScale();
-  sequence = makeSequence(scale);
-  Tone.start();
-  sequence.start(0);
-  Tone.Transport.start("+0.1");
 }
 
 $(document).ready(function() {
