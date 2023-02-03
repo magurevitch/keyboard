@@ -30,6 +30,10 @@ function makePythagoreanScale(ratio, steps) {
   return notes;
 }
 
+function normalizeGuideline(item) {
+  return item.type === 'hz' ? fractionToCents(item.number, baseNote) : item.type === 'ratio' ? fractionToCents(item.number) : item.number;
+}
+
 function snapNote(note, guides, distance) {
   var closest = indexOfSmallest(guides.map(x => Math.abs(note.cents_above_base - x)));
   if(closest[1] < distance) {
@@ -37,9 +41,19 @@ function snapNote(note, guides, distance) {
   }
 }
 
-function snapToNearest(note, snap) {
+function snapToNearestGridline(note, snap) {
   let closeMultiple = note.cents_above_base - (note.cents_above_base % snap);
   snapNote(note, [closeMultiple, closeMultiple + snap], snap);
+}
+
+function snapToNearest(note) {
+  let type = $('#snap-type').val();
+  let snap = parseFloat($('#snap').val());
+  if (type === 'cents') {
+    snapToNearestGridline(note,snap);
+  } else {
+    snapNote(note, guidelines.map(item => normalizeGuideline(item)), snap);
+  }
 }
 
 $(document).ready(function() {
@@ -73,8 +87,7 @@ $(document).ready(function() {
     }
   }).mouseup(function(event) {
     if (selected !== false) {
-      let snap = parseFloat($('#snap').val());
-      snapToNearest(intervals[selected], snap);
+      snapToNearest(intervals[selected]);
       intervals.sort((a,b) => a.cents_above_base - b.cents_above_base);
       selected = false;
     }
@@ -129,8 +142,7 @@ $(document).ready(function() {
   });
   $('#snap-all').click(function(event) {
     intervals.forEach(note => {
-      let snap = parseFloat($('#snap').val());
-      snapToNearest(note, snap);
+      snapToNearest(note);
     });
     if(playing) {
       sequence.stop(0);
