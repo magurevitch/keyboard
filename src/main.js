@@ -135,7 +135,10 @@ $(document).ready(function() {
       var position = cents < intervals[closest[0]]?.cents_above_base ? closest[0] : closest[0] + 1;
       intervals.splice(position, 0, {cents_above_base: cents, in_scale: false});
     } else {
-      guidelines.push({number: number, type: type});
+      let guideline = {number: number, type: type};
+      let snap = parseFloat($('#snap').val());
+      intervals.forEach((item) => item.in_scale = item.in_scale || !!nearestGuide(item, [normalizeGuideline(guideline)], snap));
+      guidelines.push(guideline);
     }
     draw();
   });
