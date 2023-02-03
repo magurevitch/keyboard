@@ -2,7 +2,7 @@ var sequence = null;
 var playing = false;
 let pythagoreanPhrygian = [...makePythagoreanScale(3, 7), 2].map(ratio => fractionToCents(ratio));
 var intervals = makeTet(12).map(x => {
-  return {cents_above_base: x, in_scale: !!nearestGuide(x, pythagoreanPhrygian, 20)};
+  return {cents_above_base: x, in_scale: !!nearestGuide(x, pythagoreanPhrygian, 12)};
 });
 var selected = false;
 var guidelines = [{number: 2, type: 'ratio'}];
@@ -26,7 +26,7 @@ function makeTet(number) {
 }
 
 function makePythagoreanScale(ratio, steps) {
-  let notes = range(steps).map(i => normalizeToBase(Math.pow(ratio, i), 2)[0]);
+  let notes = range(1,steps).map(i => normalizeToBase(Math.pow(ratio, i), 2)[0]);
   notes.sort();
   return notes;
 }
