@@ -34,8 +34,8 @@ function normalizeGuideline(item) {
   return item.type === 'hz' ? fractionToCents(item.number, baseNote) : item.type === 'ratio' ? fractionToCents(item.number) : item.number;
 }
 
-function nearestGuide(note, guides, distance) {
-  var closest = indexOfSmallest(guides.map(x => Math.abs(note.cents_above_base - x)));
+function nearestGuide(value, guides, distance) {
+  var closest = indexOfSmallest(guides.map(x => Math.abs(value - x)));
   if(closest[1] < distance) {
     return guides[closest[0]];
   }
@@ -48,9 +48,9 @@ function snapToNearest(note) {
   let closest;
   if (type === 'cents') {
     let closeMultiple = note.cents_above_base - (note.cents_above_base % snap);
-    closest = nearestGuide(note, [closeMultiple, closeMultiple + snap], snap);
+    closest = nearestGuide(note.cents_above_base , [closeMultiple, closeMultiple + snap], snap);
   } else {
-    closest = nearestGuide(note, guidelines.map(item => normalizeGuideline(item)), snap);
+    closest = nearestGuide(note.cents_above_base , guidelines.map(item => normalizeGuideline(item)), snap);
   }
   note.cents_above_base = closest || note.cents_above_base;
 }
@@ -137,7 +137,7 @@ $(document).ready(function() {
     } else {
       let guideline = {number: number, type: type};
       let snap = parseFloat($('#snap').val());
-      intervals.forEach((item) => item.in_scale = item.in_scale || !!nearestGuide(item, [normalizeGuideline(guideline)], snap));
+      intervals.forEach((item) => item.in_scale = item.in_scale || !!nearestGuide(item.cents_above_base , [normalizeGuideline(guideline)], snap));
       guidelines.push(guideline);
     }
     draw();
@@ -159,8 +159,10 @@ $(document).ready(function() {
       sequence.stop(0);
       playing = false;
     }
+    let snap = parseFloat($('#snap').val());
+    let scaleNotes = intervals.filter(x => x.in_scale).map(x => x.cents_above_base);
     intervals = makeTet(tet).map(x => {
-      return {cents_above_base: x, in_scale: false};
+      return {cents_above_base: x, in_scale: !!nearestGuide(x, scaleNotes, snap)};
     });
     draw();
   });
