@@ -51,13 +51,16 @@ $(document).ready(function() {
     if(closest[1] < 15) {
       if(20 < event.offsetY && event.offsetY < 50) {
         intervals[closest[0]].in_scale = !intervals[closest[0]].in_scale;
+        playNote(closest[0]);
       } else {
         selected = closest[0];
+        playNote(selected);
       }
     } else {
       var cents = scaleFromCanvas(event.offsetX);
       var position = cents < intervals[closest[0]]?.cents_above_base ? closest[0] : closest[0] + 1;
       intervals.splice(position, 0, {cents_above_base: cents, in_scale: false});
+      playNote(position);
     }
     draw();
   }).mousemove(function(event) {
@@ -65,6 +68,7 @@ $(document).ready(function() {
       var canvas = $('#temperment').get(0);
       var scaleFromCanvas = x => linearMapping(x,canvas.width/8,7*canvas.width/8,0,1200);
       intervals[selected].cents_above_base = scaleFromCanvas(event.offsetX);
+      playNote(selected);
       draw();
     }
   }).mouseup(function(event) {
