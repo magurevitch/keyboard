@@ -1,14 +1,11 @@
 var sequence = null;
 var playing = false;
+let pythagoreanPhrygian = [...makePythagoreanScale(3, 7), 2].map(ratio => fractionToCents(ratio));
 var intervals = makeTet(12).map(x => {
-  return {cents_above_base: x, in_scale: false};
+  return {cents_above_base: x, in_scale: !!nearestGuide(x, pythagoreanPhrygian, 12)};
 });
 var selected = false;
 var guidelines = [{number: 2, type: 'ratio'}];
-
-function fsum(funcs) {
-  return (x) => funcs.map(f => f(x)).reduce((a,b)=>a+b, 0);
-}
 
 function getScaleIndices() {
   return intervals.reduce((acc, x, i) => x.in_scale ? [...acc, i] : acc, []);
@@ -19,69 +16,44 @@ function makeScale() {
   return [-1, ...indices, ...indices.slice(0, indices.length-1).reverse(), -1];
 }
 
-function fractionToCents(a, b) {
-  return 1200 * Math.log2(b ? a/b : a);
-}
-
-function centsToFraction(cents_above_base) {
-  return Math.pow(2, cents_above_base / 1200);
-}
-
 function scaleToTemperment(x) {
   let canvas = $('#temperment').get(0);
   return linearMapping(x,0,1200,canvas.width/8,7*canvas.width/8);
-}
-
-function linearMapping(x, a, b, c, d) {
-  return (x-a)*(d-c)/(b-a) + c;
-}
-
-function range(start, finish) {
-  if(!finish) {
-    finish = start;
-    start = 0;
-  }
-  var array = [];
-  for(var i=start;i<finish; i++) {
-    array.push(i);
-  }
-  return array;
 }
 
 function makeTet(number) {
   return range(1,number+1).map(x => x * 1200/number);
 }
 
-function makePythagorean(ratio, comma) {
-  return [];
+function makePythagoreanScale(ratio, steps) {
+  let notes = range(1,steps).map(i => normalizeToBase(Math.pow(ratio, i), 2)[0]);
+  notes.sort();
+  return notes;
 }
 
-function indexOfSmallest(a) {
- var lowest = 0;
- for (var i = 1; i < a.length; i++) {
-  if (a[i] < a[lowest]) lowest = i;
- }
- return [lowest, a[lowest]];
+function normalizeGuideline(item) {
+  return item.type === 'hz' ? fractionToCents(item.number, baseNote) : item.type === 'ratio' ? fractionToCents(item.number) : item.number;
 }
 
-function snapNote(note, guides, distance) {
-  var closest = indexOfSmallest(guides.map(x => Math.abs(note.cents_above_base - x)));
+function nearestGuide(value, guides, distance) {
+  var closest = indexOfSmallest(guides.map(x => Math.abs(value - x)));
   if(closest[1] < distance) {
-    note.cents_above_base = guides[closest[0]];
+    return guides[closest[0]];
   }
+  return null;
 }
 
-function snapToNearest(note, snap) {
-  let closeMultiple = note.cents_above_base - (note.cents_above_base % snap);
-  snapNote(note, [closeMultiple, closeMultiple + snap], snap);
-}
-
-function startSequence() {
-  let scale = makeScale();
-  sequence = makeSequence(scale);
-  Tone.start();
-  sequence.start(0);
-  Tone.Transport.start("+0.1");
+function snapToNearest(note) {
+  let type = $('#snap-type').val();
+  let snap = parseFloat($('#snap').val());
+  let closest;
+  if (type === 'cents') {
+    let closeMultiple = note.cents_above_base - (note.cents_above_base % snap);
+    closest = nearestGuide(note.cents_above_base , [closeMultiple, closeMultiple + snap], snap);
+  } else {
+    closest = nearestGuide(note.cents_above_base , guidelines.map(item => normalizeGuideline(item)), snap);
+  }
+  note.cents_above_base = closest || note.cents_above_base;
 }
 
 $(document).ready(function() {
@@ -93,13 +65,16 @@ $(document).ready(function() {
     if(closest[1] < 15) {
       if(20 < event.offsetY && event.offsetY < 50) {
         intervals[closest[0]].in_scale = !intervals[closest[0]].in_scale;
+        playNote(closest[0]);
       } else {
         selected = closest[0];
+        playNote(selected);
       }
     } else {
       var cents = scaleFromCanvas(event.offsetX);
       var position = cents < intervals[closest[0]]?.cents_above_base ? closest[0] : closest[0] + 1;
       intervals.splice(position, 0, {cents_above_base: cents, in_scale: false});
+      playNote(position);
     }
     draw();
   }).mousemove(function(event) {
@@ -107,12 +82,12 @@ $(document).ready(function() {
       var canvas = $('#temperment').get(0);
       var scaleFromCanvas = x => linearMapping(x,canvas.width/8,7*canvas.width/8,0,1200);
       intervals[selected].cents_above_base = scaleFromCanvas(event.offsetX);
+      playNote(selected);
       draw();
     }
   }).mouseup(function(event) {
     if (selected !== false) {
-      let snap = parseFloat($('#snap').val());
-      snapToNearest(intervals[selected], snap);
+      snapToNearest(intervals[selected]);
       intervals.sort((a,b) => a.cents_above_base - b.cents_above_base);
       selected = false;
     }
@@ -161,14 +136,16 @@ $(document).ready(function() {
       var position = cents < intervals[closest[0]]?.cents_above_base ? closest[0] : closest[0] + 1;
       intervals.splice(position, 0, {cents_above_base: cents, in_scale: false});
     } else {
-      guidelines.push({number: number, type: type});
+      let guideline = {number: number, type: type};
+      let snap = parseFloat($('#snap').val());
+      intervals.forEach((item) => item.in_scale = item.in_scale || !!nearestGuide(item.cents_above_base , [normalizeGuideline(guideline)], snap));
+      guidelines.push(guideline);
     }
     draw();
   });
   $('#snap-all').click(function(event) {
     intervals.forEach(note => {
-      let snap = parseFloat($('#snap').val());
-      snapToNearest(note, snap);
+      snapToNearest(note);
     });
     if(playing) {
       sequence.stop(0);
@@ -183,8 +160,10 @@ $(document).ready(function() {
       sequence.stop(0);
       playing = false;
     }
+    let snap = parseFloat($('#snap').val());
+    let scaleNotes = intervals.filter(x => x.in_scale).map(x => x.cents_above_base);
     intervals = makeTet(tet).map(x => {
-      return {cents_above_base: x, in_scale: false};
+      return {cents_above_base: x, in_scale: !!nearestGuide(x, scaleNotes, snap)};
     });
     draw();
   });

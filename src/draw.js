@@ -50,7 +50,7 @@ function showGuidelines() {
   ctx.fillStyle = "#FF00FF";
   let baseNote = parseFloat($('#base').val());
   guidelines.forEach(item => {
-    var cents = item.type === 'hz' ? fractionToCents(item.number, baseNote) : item.type === 'ratio' ? fractionToCents(item.number) : item.number;
+    var cents = normalizeGuideline(item);
     ctx.fillRect(scaleToTemperment(cents)-1, 0, 2, 105);
     ctx.fillText(item.number.toFixed(2) + ' ' + item.type, scaleToTemperment(cents)-5, 115);
   });

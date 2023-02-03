@@ -8,6 +8,7 @@
   <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.7/Tone.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="src/utils.js"></script>
     <script src="src/draw.js"></script>
     <script src="src/tone.js"></script>
     <script src="src/main.js"></script>
@@ -15,12 +16,15 @@
     <canvas height="120" width="800" id="keyboard"></canvas>
     <div>
       Base note:
-      <input type="number" min="200" max="600" value="440" id="base">
+      <input type="number" min="200" max="600" value="350" id="base">
     </div>
     <div>
       Snap to the nearest
       <input type="number" min="0" max="200" value="10" id="snap">
-      cents
+      <select id="snap-type">
+          <option value="cents">cents</option>
+          <option value="guideline">guideline</option>
+      </select>
       <button id="snap-all">Snap all</button>
     </div>
     <div>

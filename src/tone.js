@@ -10,6 +10,14 @@ function makeSequence(scale) {
   }, scale, "4n");
 };
 
+function startSequence() {
+  let scale = makeScale();
+  sequence = makeSequence(scale);
+  Tone.start();
+  sequence.start(0);
+  Tone.Transport.start("+0.1");
+}
+
 function playNote(index, time, noRedraw) {
   draw();
   highlightNote(index);
