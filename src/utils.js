@@ -12,7 +12,6 @@ function modulo(n, d) {
 
 function normalizeToBase(num, base) {
   let log = Math.log(num) / Math.log(base);
-  console.log(log % 1)
   return [Math.pow(base, modulo(log,1)), Math.floor(log)];
 }
 

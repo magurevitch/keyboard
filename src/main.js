@@ -1,7 +1,8 @@
 var sequence = null;
 var playing = false;
+let pythagoreanPhrygian = [...makePythagoreanScale(3, 7), 2].map(ratio => fractionToCents(ratio));
 var intervals = makeTet(12).map(x => {
-  return {cents_above_base: x, in_scale: false};
+  return {cents_above_base: x, in_scale: !!nearestGuide(x, pythagoreanPhrygian, 20)};
 });
 var selected = false;
 var guidelines = [{number: 2, type: 'ratio'}];
