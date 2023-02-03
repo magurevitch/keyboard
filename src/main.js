@@ -24,8 +24,10 @@ function makeTet(number) {
   return range(1,number+1).map(x => x * 1200/number);
 }
 
-function makePythagorean(ratio, comma) {
-  return [];
+function makePythagoreanScale(ratio, steps) {
+  let notes = range(steps).map(i => normalizeToBase(Math.pow(ratio, i), 2)[0]);
+  notes.sort();
+  return notes;
 }
 
 function snapNote(note, guides, distance) {

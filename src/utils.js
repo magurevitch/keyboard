@@ -6,6 +6,16 @@ function fractionToCents(a, b) {
   return 1200 * Math.log2(b ? a/b : a);
 }
 
+function modulo(n, d) {
+  return ((n % d) + d) % d;
+}
+
+function normalizeToBase(num, base) {
+  let log = Math.log(num) / Math.log(base);
+  console.log(log % 1)
+  return [Math.pow(base, modulo(log,1)), Math.floor(log)];
+}
+
 function centsToFraction(cents_above_base) {
   return Math.pow(2, cents_above_base / 1200);
 }
