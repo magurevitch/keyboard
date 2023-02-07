@@ -58,24 +58,36 @@ function makeKnob(name, hasCurve) {
   }
 }
 
-const HARMONICS = {
-  1: "Fundamental",
-  2: "Octave",
-  3: "Perfect 5th",
-  4: "Octave",
-  5: "Major 3rd",
-  6: "Perfect 5th",
-  7: "Harmonic 7th",
-  8: "Octave",
-  9: "Major 2nd",
-  10: "Major 3rd",
-  11: "Tritone",
-  12: "Perfect 5th",
-  13: "Neutral 6th",
-  14: "Harmonic 7th",
-  15: "Major 7th",
-  16: "Octave"
-};
+const HARMONIC_CLASSES = [
+  ["Octave"],
+  ["Perfect 5th"],
+  ["Major 3rd", "Harmonic 7th"],
+  ["Major 2nd", "Diminished Tritone", "Neutral 6th", "Major 7th"],
+  ["Minor 2nd", "Minor 3rd", "Narrow 4th", "Augmented Tritone", "Augmented 5th", "Minor 6th", "Minor 7th", "Augmented 7th"]
+];
+
+function harmonicsRows(rows) {
+  synth.oscillator.partials = new Array(Math.pow(2,rows)-1).fill(1);
+  const headers = HARMONIC_CLASSES.slice(0, rows).reduce((a,b) => interleave(a, b));
+  $('#partials').append(`<tr>${headers.map((h,i) => `<th>${h} <input type="number" id="harmonic-class-${i}" min=-1 max=1 step=0.1 value=1></th>`)}</tr>`);
+  range(rows).forEach(rowNum => {
+    let indices = range(Math.pow(2,rowNum), Math.pow(2,rowNum+1));
+    let spacer = Math.pow(2,rows-(rowNum+1));
+    let row = `${`<tr>${indices.map((i,j) => `<td colspan="${spacer}">${i} <input type="number" id="harmonic-${i}" min=-1 max=1 step=0.1 value=1 class="harmonic-class-${j*spacer}"></td>`)}</tr>`}`;
+    $('#partials').append(row);
+    indices.forEach(i => $(`#harmonic-${i}`).change(() => {
+      let val = parseFloat($(`#harmonic-${i}`).val());
+      let newPartials = [...synth.oscillator.partials];
+      newPartials.splice(i-1, 1, val);
+      synth.oscillator.partials = newPartials;
+      playNote(-1);
+    }));
+  });
+  range(Math.pow(2,rows)).forEach(i => $(`#harmonic-class-${i}`).change(() => {
+    let val = parseFloat($(`#harmonic-class-${i}`).val());
+    $(`.harmonic-class-${i}`).val(val).trigger('change');
+  }));
+}
 
 $(document).ready(function() {
   makeKnob('attack', true);
@@ -87,18 +99,7 @@ $(document).ready(function() {
   $('#oscillator-type').change(() => {
     let val = $('#oscillator-type').val();
     if (val === 'partials') {
-      synth.oscillator.partials = new Array(16).fill(1);
-      range(1,17).forEach((item) => {
-        $('#partials').append(`<div class="flex-child">${item} (${HARMONICS[item]}) <input type="number" id="harmonic-${item}" min=-1 max=1 step=0.1 value=1></div>`);
-        $(`#harmonic-${item}`).change(() => {
-          let val = parseFloat($(`#harmonic-${item}`).val());
-          let newPartials = [...synth.oscillator.partials];
-          newPartials.splice(item-1, 1, val);
-          synth.oscillator.partials = newPartials;
-          playNote(-1);
-        });
-      });
-
+      harmonicsRows(4);
     } else {
       $('#partials').empty();
       synth.oscillator.type = val;
