@@ -60,6 +60,17 @@
             <option value="sawtooth">sawtooth</option>
             <option value="partials">partials</option>
         </select>
+        <div id="harmonics" hidden>
+          <div>
+            Show <input type="number" id="harmonics-periods" value="4" min="2" max="5"> rows
+          </div>
+          <div>
+            Odd harmonics <input type="number" id="odd-harmonics" min=-1 max=1 step=0.1 value=1>
+          </div>
+          <div>
+            Even harmonics <input type="number" id="even-harmonics" min=-1 max=1 step=0.1 value=1>
+          </div>
+        </div>
         <table id="partials"></table>
       </div>
     </div>

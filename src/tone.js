@@ -73,7 +73,7 @@ function harmonicsRows(rows) {
   range(rows).forEach(rowNum => {
     let indices = range(Math.pow(2,rowNum), Math.pow(2,rowNum+1));
     let spacer = Math.pow(2,rows-(rowNum+1));
-    let row = `${`<tr>${indices.map((i,j) => `<td colspan="${spacer}">${i} <input type="number" id="harmonic-${i}" min=-1 max=1 step=0.1 value=1 class="harmonic-class-${j*spacer}"></td>`)}</tr>`}`;
+    let row = `${`<tr>${indices.map((i,j) => `<td colspan="${spacer}">${i} <input type="number" id="harmonic-${i}" min=-1 max=1 step=0.1 value=1 class="harmonic-class-${j*spacer} ${i % 2 === 0 ? 'even' : 'odd' }-harmonic"></td>`)}</tr>`}`;
     $('#partials').append(row);
     indices.forEach(i => $(`#harmonic-${i}`).change(() => {
       let val = parseFloat($(`#harmonic-${i}`).val());
@@ -100,10 +100,25 @@ $(document).ready(function() {
     let val = $('#oscillator-type').val();
     if (val === 'partials') {
       harmonicsRows(4);
+      $('#harmonics').show()
     } else {
       $('#partials').empty();
+      $('#harmonics').hide();
       synth.oscillator.type = val;
     }
     playNote(-1);
+  });
+  $('#harmonics-periods').change(() => {
+    let val = parseInt($('#harmonics-periods').val());
+    $('#partials').empty();
+    harmonicsRows(val);
+  });
+  $(`#odd-harmonics`).change(() => {
+    let val = parseFloat($(`#odd-harmonics`).val());
+    $(`.odd-harmonic`).val(val).trigger('change');
+  });
+  $(`#even-harmonics`).change(() => {
+    let val = parseFloat($(`#even-harmonics`).val());
+    $(`.even-harmonic`).val(val).trigger('change');
   });
 });
