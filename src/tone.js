@@ -114,11 +114,23 @@ $(document).ready(function() {
     harmonicsRows(val);
   });
   $(`#odd-harmonics`).change(() => {
-    let val = parseFloat($(`#odd-harmonics`).val());
-    $(`.odd-harmonic`).val(val).trigger('change');
+    let f = new Function('n', `return ${$('#odd-harmonics').val()}`);
+    $('.odd-harmonic').map(function(index,dom) {
+      try {
+        $(dom).val(f(extractNum(dom.id))).trigger('change');
+      } catch (e) {
+        console.log(e);
+      }
+    });
   });
   $(`#even-harmonics`).change(() => {
-    let val = parseFloat($(`#even-harmonics`).val());
-    $(`.even-harmonic`).val(val).trigger('change');
+    let f = new Function('n', `return ${$('#even-harmonics').val()}`);
+    $('.even-harmonic').map(function(index,dom) {
+      try{
+        $(dom).val(f(extractNum(dom.id))).trigger('change');
+      } catch (e) {
+        console.log(e);
+      }
+    });
   });
 });

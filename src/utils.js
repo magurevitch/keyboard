@@ -50,3 +50,7 @@ function interleave (arr, arr2) {
     }
     return newArr;
 };
+
+function extractNum(id) {
+  return parseInt(id.split('-').pop()); 
+}
