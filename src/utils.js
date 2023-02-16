@@ -44,9 +44,14 @@ function indexOfSmallest(a) {
 }
 
 function interleave (arr, arr2) {
+    if (!arr.length) return arr2.slice(); 
     let newArr = [];
     for (let i = 0; i < arr.length; i++) {
         newArr.push(arr[i], arr2[i]);
     }
     return newArr;
 };
+
+function extractNum(id) {
+  return parseInt(id.split('-').pop());
+}
