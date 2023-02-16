@@ -1,7 +1,4 @@
 var synth = new Tone.Synth().toDestination();
-Tone.Transport.scheduleRepeat((time) => drawOscillator(synth.oscillator, time, frequency), 1/60);
-Tone.Transport.start(0);
-
 let frequency = 1;
 
 function makeSequence(scale) {
@@ -19,6 +16,7 @@ function startSequence() {
 }
 
 function playNote(index, time, noRedraw) {
+  Tone.Transport.start(time);
   draw();
   highlightNote(index);
   let ratio = centsToFraction(intervals[index]?.cents_above_base || 0);
@@ -66,9 +64,15 @@ const HARMONIC_CLASSES = [
   ["Minor 2nd", "Minor 3rd", "Narrow 4th", "Augmented Tritone", "Augmented 5th", "Minor 6th", "Minor 7th", "Augmented 7th"]
 ];
 
+function newHarmonics(rowIndex) {
+  let fullIndex = (i) => 2**rowIndex+1+(2*i);
+  let harmonicName = (i) => HARMONIC_CLASSES[rowIndex] ? HARMONIC_CLASSES[rowIndex][i] : `Harmonic ${fullIndex(i)}`;
+  return range(2**(rowIndex-1)).map(i => `${harmonicName(i)} (${fullIndex(i)}:${2**rowIndex})`);
+}
+
 function harmonicsRows(rows) {
   synth.oscillator.partials = new Array(Math.pow(2,rows)-1).fill(1);
-  const headers = HARMONIC_CLASSES.slice(0, rows).reduce((a,b) => interleave(a, b));
+  const headers = range(rows).reduce((a,b) => interleave(a, newHarmonics(b)), []);
   $('#partials').append(`<tr>${headers.map((h,i) => `<th>${h} <input type="number" id="harmonic-class-${i}" min=-1 max=1 step=0.1 value=1></th>`)}</tr>`);
   range(rows).forEach(rowNum => {
     let indices = range(Math.pow(2,rowNum), Math.pow(2,rowNum+1));
@@ -90,12 +94,13 @@ function harmonicsRows(rows) {
 }
 
 $(document).ready(function() {
+  drawOscillator(synth.oscillator, 0, frequency);
+  Tone.Transport.scheduleRepeat((time) => drawOscillator(synth.oscillator, time, frequency), 1/60);
   makeKnob('attack', true);
   makeKnob('decay', true);
   makeKnob('sustain');
   makeKnob('release', true);
   drawEnvelope(synth.envelope);
-  drawOscillator(synth.oscillator, 0, frequency);
   $('#oscillator-type').change(() => {
     let val = $('#oscillator-type').val();
     if (val === 'partials') {
@@ -112,6 +117,8 @@ $(document).ready(function() {
     let val = parseInt($('#harmonics-periods').val());
     $('#partials').empty();
     harmonicsRows(val);
+    $(`#odd-harmonics`).val(1);
+    $(`#even-harmonics`).val(1);
   });
   $(`#odd-harmonics`).change(() => {
     let f = new Function('n', `return ${$('#odd-harmonics').val()}`);
