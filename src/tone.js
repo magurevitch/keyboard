@@ -1,4 +1,4 @@
-var synth = new Tone.Synth().toDestination();
+var synth = new Tone.PolySynth().toDestination();
 let frequency = 1;
 
 function makeSequence(scale) {
@@ -33,7 +33,7 @@ function playNote(index, time, noRedraw) {
 function makeKnob(name, hasCurve) {
   $('#envelope').append(`<div>
           ${name}
-          <input type="number" id="${name}" min=0 max=1 step=0.1 value=${synth.envelope[name]}>
+          <input type="number" id="${name}" min=0 max=1 step=0.1 value=${synth.get().envelope[name]}>
           ${hasCurve ? `<select id="${name}-curve">
             <option value="linear">linear</option>
             <option value="exponential">exponential</option>
@@ -41,16 +41,16 @@ function makeKnob(name, hasCurve) {
         </div>`);
   $(`#${name}`).change(() => {
     let val = parseFloat($(`#${name}`).val());
-    synth.envelope[name] = val;
-    drawEnvelope(synth.envelope);
+    synth.set({ envelope: {[name]: val}});
+    drawEnvelope(synth.get().envelope);
     playNote(-1);
   });
   if (hasCurve) {
-    synth.envelope[`${name}Curve`] = "linear";
+    synth.set({envelope: {[`${name}Curve`] : "linear"}});
     $(`#${name}-curve`).change(() => {
       let val = $(`#${name}-curve`).val();
-      synth.envelope[`${name}Curve`] = val;
-      drawEnvelope(synth.envelope);
+      synth.set({envelope: {[`${name}Curve`] : val}});
+      drawEnvelope(synth.get().envelope);
       playNote(-1);
     });
   }
@@ -71,7 +71,7 @@ function newHarmonics(rowIndex) {
 }
 
 function harmonicsRows(rows) {
-  synth.oscillator.partials = new Array(Math.pow(2,rows)-1).fill(1);
+  synth.set({oscillator: {partials: new Array(Math.pow(2,rows)-1).fill(1)}});
   const headers = range(rows).reduce((a,b) => interleave(a, newHarmonics(b)), []);
   $('#partials').append(`<tr>${headers.map((h,i) => `<th>${h} <input type="number" id="harmonic-class-${i}" min=-1 max=1 step=0.1 value=1></th>`)}</tr>`);
   range(rows).forEach(rowNum => {
@@ -81,9 +81,9 @@ function harmonicsRows(rows) {
     $('#partials').append(row);
     indices.forEach(i => $(`#harmonic-${i}`).change(() => {
       let val = parseFloat($(`#harmonic-${i}`).val());
-      let newPartials = [...synth.oscillator.partials];
+      let newPartials = [...synth.get().oscillator.partials];
       newPartials.splice(i-1, 1, val);
-      synth.oscillator.partials = newPartials;
+      synth.set({oscillator: {partials: newPartials}});
       playNote(-1);
     }));
   });
@@ -94,13 +94,13 @@ function harmonicsRows(rows) {
 }
 
 $(document).ready(function() {
-  drawOscillator(synth.oscillator, 0, frequency);
-  Tone.Transport.scheduleRepeat((time) => drawOscillator(synth.oscillator, time, frequency), 1/60);
+  drawOscillator(synth.get().oscillator, 0, frequency);
+  Tone.Transport.scheduleRepeat((time) => drawOscillator(synth.get().oscillator, time, frequency), 1/60);
   makeKnob('attack', true);
   makeKnob('decay', true);
   makeKnob('sustain');
   makeKnob('release', true);
-  drawEnvelope(synth.envelope);
+  drawEnvelope(synth.get().envelope);
   $('#oscillator-type').change(() => {
     let val = $('#oscillator-type').val();
     if (val === 'partials') {
@@ -109,7 +109,7 @@ $(document).ready(function() {
     } else {
       $('#partials').empty();
       $('#harmonics').hide();
-      synth.oscillator.type = val;
+      synth.set({oscillator: {type: val}});
     }
     playNote(-1);
   });
