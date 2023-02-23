@@ -56,6 +56,17 @@ function snapToNearest(note) {
   note.cents_above_base = closest || note.cents_above_base;
 }
 
+function makeMode(scaleDegree) {
+  if(scaleDegree < 0) return intervals;
+  if(!objEqual(intervals[intervals.length-1], {cents_above_base: 1200, in_scale: true})) return intervals;
+
+  const tempermentDegree = getScaleIndices()[scaleDegree];
+  const centShift = intervals[tempermentDegree].cents_above_base;
+  let after = intervals.slice(tempermentDegree+1).map(x =>  {return { cents_above_base: x.cents_above_base - centShift, in_scale: x.in_scale }});
+  let before = intervals.slice(0,tempermentDegree).map(x => { return { cents_above_base: x.cents_above_base - centShift + 1200, in_scale: x.in_scale }});
+  return [...after, ...before, {cents_above_base: 1200, in_scale: true}];
+}
+
 $(document).ready(function() {
   draw();
   $('#temperment').mousedown(function(event) {
