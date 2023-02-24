@@ -1,6 +1,6 @@
 var sequence = null;
 var playing = false;
-let pythagoreanPhrygian = [...makePythagoreanScale(3, 7), 2].map(ratio => fractionToCents(ratio));
+let pythagoreanPhrygian = makePythagoreanScale(3, 7);
 var intervals = makeTet(12).map(x => {
   return {cents_above_base: x, in_scale: !!nearestGuide(x, pythagoreanPhrygian, 12)};
 });
@@ -28,7 +28,7 @@ function makeTet(number) {
 function makePythagoreanScale(ratio, steps) {
   let notes = range(1,steps).map(i => normalizeToBase(Math.pow(ratio, i), 2)[0]);
   notes.sort();
-  return notes;
+  return [...notes, 2].map(ratio => fractionToCents(ratio));
 }
 
 function normalizeGuideline(item) {
@@ -54,6 +54,17 @@ function snapToNearest(note) {
     closest = nearestGuide(note.cents_above_base , guidelines.map(item => normalizeGuideline(item)), snap);
   }
   note.cents_above_base = closest || note.cents_above_base;
+}
+
+function makeMode(scaleDegree) {
+  if(scaleDegree < 0) return intervals;
+  if(!objEqual(intervals[intervals.length-1], {cents_above_base: 1200, in_scale: true})) return intervals;
+
+  const tempermentDegree = getScaleIndices()[scaleDegree];
+  const centShift = intervals[tempermentDegree].cents_above_base;
+  let after = intervals.slice(tempermentDegree+1).map(x =>  {return { cents_above_base: x.cents_above_base - centShift, in_scale: x.in_scale }});
+  let before = intervals.slice(0,tempermentDegree).map(x => { return { cents_above_base: x.cents_above_base - centShift + 1200, in_scale: x.in_scale }});
+  return [...after, ...before, {cents_above_base: 1200, in_scale: true}];
 }
 
 $(document).ready(function() {
@@ -153,8 +164,8 @@ $(document).ready(function() {
     }
     draw();
   });
-  $('#make-tet').click(function(event) {
-    let tet = parseFloat($('#tet').val());
+  $('#make-temperment').click(function(event) {
+    let scaleSteps = parseFloat($('#scale-steps').val());
     if(playing) {
       $('#play').text("Play Scale");
       sequence.stop(0);
@@ -162,9 +173,37 @@ $(document).ready(function() {
     }
     let snap = parseFloat($('#snap').val());
     let scaleNotes = intervals.filter(x => x.in_scale).map(x => x.cents_above_base);
-    intervals = makeTet(tet).map(x => {
+    let type =  $('#temperment-type').val();
+
+    let newScale = [];
+    if (type === 'tet') {
+      newScale = makeTet(scaleSteps);
+    } else if (type === 'pythagorean') {
+      let ratio = parseFloat($('#pythag-top').val()) / parseFloat($('#pythag-bottom').val());
+      newScale = makePythagoreanScale(ratio, scaleSteps);
+    }
+
+    intervals = newScale.map(x => {
       return {cents_above_base: x, in_scale: !!nearestGuide(x, scaleNotes, snap)};
     });
+    draw();
+  });
+  $('#temperment-type').change((e) => {
+    let type =  $('#temperment-type').val();
+    if (type === 'pythagorean') {
+      $('#temperment-ratio').show();
+    } else {
+      $('#temperment-ratio').hide();
+    }
+  })
+  $('#make-mode').click(function(event) {
+    let modeDegree = parseInt($('#mode-degree').val()) - 1;
+    if(playing) {
+      $('#play').text("Play Scale");
+      sequence.stop(0);
+      playing = false;
+    }
+    intervals = makeMode(modeDegree);
     draw();
   });
   $('#base').change(function(event) {

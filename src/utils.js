@@ -44,7 +44,7 @@ function indexOfSmallest(a) {
 }
 
 function interleave (arr, arr2) {
-    if (!arr.length) return arr2.slice(); 
+    if (!arr.length) return arr2.slice();
     let newArr = [];
     for (let i = 0; i < arr.length; i++) {
         newArr.push(arr[i], arr2[i]);
@@ -54,4 +54,18 @@ function interleave (arr, arr2) {
 
 function extractNum(id) {
   return parseInt(id.split('-').pop());
+}
+
+function objEqual(object1, object2) {
+  const keys1 = Object.keys(object1);
+  const keys2 = Object.keys(object2);
+  if (keys1.length !== keys2.length) {
+    return false;
+  }
+  for (let key of keys1) {
+    if (object1[key] !== object2[key]) {
+      return false;
+    }
+  }
+  return true;
 }
