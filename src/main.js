@@ -178,6 +178,16 @@ $(document).ready(function() {
     });
     draw();
   });
+  $('#make-mode').click(function(event) {
+    let modeDegree = parseInt($('#mode-degree').val()) - 1;
+    if(playing) {
+      $('#play').text("Play Scale");
+      sequence.stop(0);
+      playing = false;
+    }
+    intervals = makeMode(modeDegree);
+    draw();
+  });
   $('#base').change(function(event) {
     draw();
   });
