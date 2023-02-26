@@ -197,7 +197,7 @@ $(document).ready(function() {
     }
   })
   $('#make-mode').click(function(event) {
-    let modeDegree = parseInt($('#mode-degree').val()) - 1;
+    let modeDegree = parseInt($('#mode-degree').val()) - 2;
     if(playing) {
       $('#play').text("Play Scale");
       sequence.stop(0);
